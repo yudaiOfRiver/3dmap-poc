@@ -2,433 +2,67 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D駅マップ PoC - 新宿駅</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif; background: #1a1a2e; }
-    #canvas { display: block; }
-
-    #ui {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none;
-    }
-
-    #header {
-      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.7); color: #fff; padding: 8px 24px;
-      border-radius: 8px; font-size: 18px; font-weight: bold;
-      backdrop-filter: blur(8px); pointer-events: auto;
-    }
-
-    #floor-panel {
-      position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-      display: flex; flex-direction: column; gap: 4px;
-      pointer-events: auto;
-    }
-
-    .floor-btn {
-      width: 56px; height: 44px; border: 2px solid rgba(255,255,255,0.3);
-      background: rgba(0,0,0,0.6); color: #fff; font-size: 14px; font-weight: bold;
-      border-radius: 8px; cursor: pointer; transition: all 0.2s;
-      backdrop-filter: blur(8px);
-    }
-    .floor-btn:hover { background: rgba(100,100,255,0.4); border-color: #88f; }
-    .floor-btn.active { background: rgba(80,80,255,0.7); border-color: #aaf; }
-
-    #info-panel {
-      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.7); color: #fff; padding: 12px 24px;
-      border-radius: 8px; font-size: 14px; backdrop-filter: blur(8px);
-      pointer-events: auto; max-width: 500px; text-align: center;
-    }
-
-    #legend {
-      position: absolute; left: 20px; bottom: 20px;
-      background: rgba(0,0,0,0.7); color: #fff; padding: 12px 16px;
-      border-radius: 8px; font-size: 12px; backdrop-filter: blur(8px);
-      pointer-events: auto;
-    }
-    #legend div { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-    .legend-color {
-      width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
-    }
-
-    #tooltip {
-      position: absolute; display: none;
-      background: rgba(0,0,0,0.85); color: #fff; padding: 8px 14px;
-      border-radius: 6px; font-size: 13px; pointer-events: none;
-      white-space: nowrap;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3D駅マップ - 新宿駅</title>
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div id="ui">
-    <div id="header">3D駅マップ PoC - 新宿駅（簡易モデル）</div>
+    <div id="header">新宿駅 3Dマップ</div>
+
+    <!-- 検索 -->
+    <div id="search-container">
+      <input type="text" id="search-input" placeholder="施設を検索（トイレ, 出口, エレベーター...）" autocomplete="off">
+      <button id="search-clear" style="display:none">&times;</button>
+      <div id="search-results"></div>
+    </div>
 
     <div id="floor-panel"></div>
 
     <div id="legend">
-      <div style="font-weight:bold; margin-bottom:4px;">凡例</div>
-      <div><span class="legend-color" style="background:#4488ff"></span>ホーム</div>
-      <div><span class="legend-color" style="background:#44cc88"></span>改札・コンコース</div>
-      <div><span class="legend-color" style="background:#ffaa44"></span>商業施設・通路</div>
-      <div><span class="legend-color" style="background:#ff6666"></span>出口・階段</div>
-      <div><span class="legend-color" style="background:#aa88ff"></span>乗り換え通路</div>
+      <div class="legend-header">
+        <span class="toggle-icon">▼</span>
+        <span>凡例</span>
+      </div>
+      <div class="legend-items">
+        <div><span class="legend-color" style="background:#4488ff"></span>通路</div>
+        <div><span class="legend-color" style="background:#44cc88"></span>改札内</div>
+        <div><span class="legend-color" style="background:#ffaa44"></span>店舗</div>
+        <div><span class="legend-color" style="background:#ff6666"></span>階段・EV</div>
+        <div><span class="legend-color" style="background:#aa88ff"></span>ホーム</div>
+        <div><span class="legend-color" style="background:#888899"></span>フロア基盤</div>
+      </div>
     </div>
 
-    <div id="info-panel">
-      マウスドラッグ: 回転 ｜ スクロール: ズーム ｜ 右ドラッグ: 平行移動 ｜ フロアボタンで階を切替
+    <!-- 経路検索 -->
+    <div id="route-panel">
+      <div class="route-header">経路検索</div>
+      <div class="route-inputs">
+        <div class="route-field">
+          <label>出発</label>
+          <input type="text" id="route-start" placeholder="出発地を検索..." autocomplete="off">
+          <div id="route-start-results" class="route-ac"></div>
+        </div>
+        <div class="route-field">
+          <label>到着</label>
+          <input type="text" id="route-end" placeholder="目的地を検索..." autocomplete="off">
+          <div id="route-end-results" class="route-ac"></div>
+        </div>
+      </div>
+      <div class="route-actions">
+        <button id="route-go" disabled>検索</button>
+        <button id="route-clear">クリア</button>
+      </div>
+      <div id="route-result"></div>
     </div>
 
+    <!-- 施設詳細パネル -->
+    <div id="detail-panel"></div>
+
+    <div id="info-panel"></div>
     <div id="tooltip"></div>
   </div>
-
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-    }
-  }
-  </script>
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-    // --- シーン初期化 ---
-    const canvas = document.getElementById('canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
-    scene.fog = new THREE.Fog(0x1a1a2e, 80, 200);
-
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
-    camera.position.set(40, 35, 50);
-
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.target.set(0, 0, 0);
-
-    // --- ライティング ---
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(30, 50, 30);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    // グリッド（地面の参考線）
-    const grid = new THREE.GridHelper(100, 50, 0x444466, 0x333355);
-    grid.position.y = -12;
-    scene.add(grid);
-
-    // --- 色定義 ---
-    const COLORS = {
-      platform: 0x4488ff,   // ホーム
-      concourse: 0x44cc88,  // 改札・コンコース
-      shop: 0xffaa44,       // 商業施設・通路
-      exit: 0xff6666,       // 出口・階段
-      transfer: 0xaa88ff,   // 乗り換え通路
-      pillar: 0x666680,     // 柱
-    };
-
-    // --- フロアデータ定義（新宿駅の簡易モデル） ---
-    const FLOOR_HEIGHT = 5;
-    const floors = [
-      { id: 'B2', label: 'B2F', y: -10, name: '地下2階（丸ノ内線ホーム）' },
-      { id: 'B1', label: 'B1F', y: -5,  name: '地下1階（地下コンコース）' },
-      { id: '1F', label: '1F',  y: 0,   name: '1階（JR各線ホーム）' },
-      { id: '2F', label: '2F',  y: 5,   name: '2階（南口改札・甲州街道）' },
-      { id: '3F', label: '3F',  y: 10,  name: '3階（サザンテラス方面）' },
-    ];
-
-    // クリッカブルオブジェクト保持用
-    const clickableObjects = [];
-    const floorGroups = {};
-
-    function makeMaterial(color, opacity = 0.85) {
-      return new THREE.MeshPhongMaterial({
-        color, transparent: true, opacity,
-        side: THREE.DoubleSide,
-      });
-    }
-
-    function addBox(group, w, h, d, x, y, z, color, name, opacity) {
-      const geo = new THREE.BoxGeometry(w, h, d);
-      const mat = makeMaterial(color, opacity);
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(x, y, z);
-      mesh.userData.name = name;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      group.add(mesh);
-      clickableObjects.push(mesh);
-      return mesh;
-    }
-
-    function addLabel(group, text, x, y, z, size = 1.2) {
-      const cnv = document.createElement('canvas');
-      cnv.width = 256; cnv.height = 64;
-      const ctx = cnv.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(text, 128, 40);
-      const tex = new THREE.CanvasTexture(cnv);
-      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-      const sprite = new THREE.Sprite(mat);
-      sprite.position.set(x, y, z);
-      sprite.scale.set(size * 4, size, 1);
-      group.add(sprite);
-    }
-
-    // --- B2F: 丸ノ内線ホーム ---
-    function buildB2(group, baseY) {
-      // ホーム（島式）
-      addBox(group, 30, 0.5, 6, 0, baseY, 0, COLORS.platform, '丸ノ内線ホーム');
-      // 線路部分（暗い）
-      addBox(group, 30, 0.3, 3, 0, baseY - 0.5, 6, 0x333344, '丸ノ内線 線路（池袋方面）', 0.5);
-      addBox(group, 30, 0.3, 3, 0, baseY - 0.5, -6, 0x333344, '丸ノ内線 線路（荻窪方面）', 0.5);
-      // 階段
-      addBox(group, 3, 3, 3, -8, baseY + 1.5, 0, COLORS.exit, '階段 → B1Fへ');
-      addBox(group, 3, 3, 3, 8, baseY + 1.5, 0, COLORS.exit, '階段 → B1Fへ');
-      addLabel(group, '丸ノ内線ホーム', 0, baseY + 2, 0);
-    }
-
-    // --- B1F: 地下コンコース ---
-    function buildB1(group, baseY) {
-      // メインコンコース
-      addBox(group, 40, 0.5, 20, 0, baseY, 0, COLORS.concourse, '地下コンコース（中央）');
-      // 西口地下通路
-      addBox(group, 10, 0.5, 30, -20, baseY, 5, COLORS.transfer, '西口地下通路');
-      // 東口方面
-      addBox(group, 10, 0.5, 25, 20, baseY, -2, COLORS.transfer, '東口地下広場方面');
-      // 地下改札
-      addBox(group, 6, 2, 3, -5, baseY + 1, -8, COLORS.concourse, '西口地下改札');
-      addBox(group, 6, 2, 3, 5, baseY + 1, -8, COLORS.concourse, '東口地下改札');
-      // 地下商店街
-      addBox(group, 15, 2, 6, 12, baseY + 1, 8, COLORS.shop, '地下商店街（メトロプロムナード方面）');
-      // 階段
-      addBox(group, 3, 3, 3, 0, baseY + 1.5, -8, COLORS.exit, '階段 → 1Fへ');
-      addLabel(group, '地下コンコース', 0, baseY + 3, 0);
-    }
-
-    // --- 1F: JRホーム ---
-    function buildF1(group, baseY) {
-      // JRホーム群（複数並列）
-      const platformNames = [
-        '1-2番線（中央線快速）',
-        '3-4番線（中央・総武線各停）',
-        '5-6番線（山手線）',
-        '7-8番線（山手線・埼京線）',
-        '9-10番線（埼京線・湘南新宿ライン）',
-        '11-12番線（成田エクスプレス等）',
-      ];
-      for (let i = 0; i < 6; i++) {
-        const z = -12 + i * 5;
-        addBox(group, 35, 0.5, 3, 0, baseY, z, COLORS.platform, platformNames[i]);
-        // 線路
-        if (i < 5) {
-          addBox(group, 35, 0.2, 1.5, 0, baseY - 0.3, z + 2.25, 0x333344, '線路', 0.3);
-        }
-      }
-      // 柱
-      for (let x = -14; x <= 14; x += 7) {
-        for (let z = -12; z <= 13; z += 10) {
-          addBox(group, 0.8, 4, 0.8, x, baseY + 2, z, COLORS.pillar, '柱', 0.6);
-        }
-      }
-      addLabel(group, 'JR各線ホーム (1F)', 0, baseY + 4, 0);
-    }
-
-    // --- 2F: 南口改札・甲州街道レベル ---
-    function buildF2(group, baseY) {
-      // 南口コンコース
-      addBox(group, 30, 0.5, 15, 0, baseY, -5, COLORS.concourse, '南口コンコース');
-      // 改札
-      addBox(group, 8, 2, 3, -8, baseY + 1, -12, COLORS.concourse, '南口改札');
-      addBox(group, 8, 2, 3, 8, baseY + 1, -12, COLORS.concourse, '新南口改札');
-      // 甲州街道（道路）
-      addBox(group, 50, 0.3, 8, 0, baseY, -18, 0x555566, '甲州街道', 0.4);
-      // ルミネ
-      addBox(group, 10, 3, 10, -18, baseY + 1.5, -3, COLORS.shop, 'ルミネ1');
-      addBox(group, 10, 3, 10, 18, baseY + 1.5, -3, COLORS.shop, 'ルミネ2');
-      // 乗り換え通路
-      addBox(group, 4, 1, 20, -10, baseY + 0.5, 5, COLORS.transfer, '小田急線乗り換え通路');
-      addBox(group, 4, 1, 20, 10, baseY + 0.5, 5, COLORS.transfer, '京王線乗り換え通路');
-      // 階段
-      addBox(group, 3, 3, 3, 0, baseY + 1.5, 5, COLORS.exit, '階段 → 3Fサザンテラスへ');
-      addLabel(group, '南口改札・甲州街道 (2F)', 0, baseY + 4, -5);
-    }
-
-    // --- 3F: サザンテラス ---
-    function buildF3(group, baseY) {
-      // サザンテラス
-      addBox(group, 25, 0.5, 12, 5, baseY, 0, COLORS.shop, 'サザンテラス');
-      // NEWoMan
-      addBox(group, 12, 3, 10, -10, baseY + 1.5, 0, COLORS.shop, 'NEWoMan');
-      // バスタ新宿
-      addBox(group, 15, 3, 10, 18, baseY + 1.5, 0, COLORS.shop, 'バスタ新宿（高速バスターミナル）');
-      // 出口
-      addBox(group, 3, 2, 3, 5, baseY + 1, -8, COLORS.exit, '南口出口');
-      addBox(group, 3, 2, 3, 20, baseY + 1, -7, COLORS.exit, 'バスタ新宿入口');
-      addLabel(group, 'サザンテラス・バスタ新宿 (3F)', 5, baseY + 4, 0);
-    }
-
-    // --- ビルド実行 ---
-    const builders = { 'B2': buildB2, 'B1': buildB1, '1F': buildF1, '2F': buildF2, '3F': buildF3 };
-    floors.forEach(f => {
-      const group = new THREE.Group();
-      group.userData.floorId = f.id;
-      builders[f.id](group, f.y);
-      scene.add(group);
-      floorGroups[f.id] = group;
-    });
-
-    // 階間の接続線（エッジで階のつながりを示す）
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 });
-    for (let i = 0; i < floors.length - 1; i++) {
-      const y1 = floors[i].y + 2;
-      const y2 = floors[i + 1].y - 1;
-      const points = [new THREE.Vector3(0, y1, 0), new THREE.Vector3(0, y2, 0)];
-      const geo = new THREE.BufferGeometry().setFromPoints(points);
-      scene.add(new THREE.Line(geo, lineMat));
-    }
-
-    // --- フロアボタン生成 ---
-    const floorPanel = document.getElementById('floor-panel');
-    let activeFloors = new Set(floors.map(f => f.id));
-
-    // 「全表示」ボタン
-    const allBtn = document.createElement('button');
-    allBtn.className = 'floor-btn active';
-    allBtn.textContent = '全階';
-    allBtn.addEventListener('click', () => {
-      floors.forEach(f => activeFloors.add(f.id));
-      updateFloorVisibility();
-    });
-    floorPanel.appendChild(allBtn);
-
-    floors.slice().reverse().forEach(f => {
-      const btn = document.createElement('button');
-      btn.className = 'floor-btn active';
-      btn.textContent = f.label;
-      btn.dataset.floorId = f.id;
-      btn.addEventListener('click', () => {
-        if (activeFloors.size === 1 && activeFloors.has(f.id)) {
-          // 唯一選択中のフロアをクリック → 全表示に戻す
-          floors.forEach(fl => activeFloors.add(fl.id));
-        } else {
-          // そのフロアだけ表示
-          activeFloors.clear();
-          activeFloors.add(f.id);
-        }
-        updateFloorVisibility();
-      });
-      floorPanel.appendChild(btn);
-    });
-
-    function updateFloorVisibility() {
-      floors.forEach(f => {
-        const group = floorGroups[f.id];
-        const visible = activeFloors.has(f.id);
-        group.visible = visible;
-
-        // 他の階は半透明に
-        if (activeFloors.size > 1 || visible) {
-          group.traverse(child => {
-            if (child.isMesh && child.material) {
-              child.material.opacity = activeFloors.size === floors.length
-                ? (child.material.userData.baseOpacity ?? 0.85)
-                : (visible ? 0.9 : 0.15);
-            }
-          });
-        }
-      });
-
-      // ボタンのactive状態
-      document.querySelectorAll('.floor-btn[data-floor-id]').forEach(btn => {
-        btn.classList.toggle('active', activeFloors.has(btn.dataset.floorId));
-      });
-      allBtn.classList.toggle('active', activeFloors.size === floors.length);
-
-      // 単一フロア選択時はカメラを寄せる
-      if (activeFloors.size === 1) {
-        const floorId = [...activeFloors][0];
-        const f = floors.find(fl => fl.id === floorId);
-        controls.target.set(0, f.y, 0);
-      } else {
-        controls.target.set(0, 0, 0);
-      }
-    }
-
-    // base opacityの保存
-    Object.values(floorGroups).forEach(group => {
-      group.traverse(child => {
-        if (child.isMesh && child.material) {
-          child.material.userData.baseOpacity = child.material.opacity;
-        }
-      });
-    });
-
-    // --- マウスホバー（ツールチップ） ---
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    const tooltip = document.getElementById('tooltip');
-
-    canvas.addEventListener('mousemove', (e) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(clickableObjects);
-
-      if (intersects.length > 0) {
-        const obj = intersects[0].object;
-        if (obj.userData.name && obj.userData.name !== '柱' && obj.userData.name !== '線路') {
-          tooltip.style.display = 'block';
-          tooltip.style.left = (e.clientX + 15) + 'px';
-          tooltip.style.top = (e.clientY - 10) + 'px';
-          tooltip.textContent = obj.userData.name;
-
-          // ハイライト
-          obj.material.emissive = new THREE.Color(0x333333);
-        } else {
-          tooltip.style.display = 'none';
-        }
-      } else {
-        tooltip.style.display = 'none';
-      }
-
-      // ハイライト解除
-      clickableObjects.forEach(o => {
-        if (o.material.emissive) o.material.emissive.set(0x000000);
-      });
-      if (intersects.length > 0 && intersects[0].object.material.emissive) {
-        intersects[0].object.material.emissive.set(0x333333);
-      }
-    });
-
-    // --- リサイズ ---
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // --- アニメーションループ ---
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
-  </script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
