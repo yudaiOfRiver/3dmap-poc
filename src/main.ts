@@ -1,8 +1,5 @@
 import * as THREE from "three";
 import { setupScene } from "./scene/setup";
-import { buildFloor, type BuiltFloor } from "./scene/floor-builder";
-import { buildPOILayer, type POIEntry } from "./scene/poi-layer";
-import { loadFloorIndex, loadFloorData } from "./data/loader";
 import { setupFloorSelector } from "./ui/floor-selector";
 import { setupSearchPanel } from "./ui/search-panel";
 import { showDetail } from "./ui/info-panel";
@@ -12,39 +9,125 @@ import { loadNetwork, findNearestNode, findRoute, buildRouteSteps } from "./data
 import { setupRoutePanel } from "./ui/route-panel";
 import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
 import { setupLocatePanel } from "./ui/locate-panel";
-import { loadAndPlaceTenants, createTenantSprite } from "./data/tenant-loader";
-import type { FloorData } from "./data/loader";
+import type { POIEntry } from "./scene/poi-layer";
+import type { FloorInfo } from "./data/loader";
 import "./style.css";
 
-// Spaceカテゴリコードの日本語名
-const CATEGORY_NAMES: Record<string, string> = {
-  B001: "商業施設",
-  B002: "事務所",
-  B003: "公的施設",
-  B004: "待合室",
-  B005: "きっぷ売り場",
-  B006: "案内所",
-  B007: "トイレ(男性)",
-  B008: "トイレ(女性)",
-  B009: "トイレ(共用)",
-  B010: "トイレ",
-  B011: "多機能トイレ",
-  B018: "駅事務室",
-  B019: "部屋",
-  B021: "階段",
-  B022: "エレベーター",
-  B023: "エスカレーター",
-  B025: "スロープ",
-  B028: "ホーム",
-  B029: "通路",
-  B030: "デッキ",
+// --- PLATEAU データ型 ---
+
+interface PlateauSurface {
+  type: string;
+  vertices: number[];   // flat [x,y,z, ...]
+  indices: number[];     // triangle indices
+  normal?: number[];
+  centroid?: [number, number, number];
+}
+
+interface PlateauFloorData {
+  ordinal: number;
+  y: number;
+  surfaces: PlateauSurface[];
+  stats: Record<string, number>;
+}
+
+// --- サーフェス描画設定 ---
+
+const SURFACE_COLORS: Record<string, number> = {
+  wall: 0x8899aa,
+  floor: 0x556677,
+  ceiling: 0x667788,
+  closure: 0x778899,
+  door: 0x33cc77,
+  window: 0x88ddff,
+  installation: 0xaa8866,
 };
+
+const SURFACE_OPACITY: Record<string, number> = {
+  wall: 0.7,
+  floor: 0.5,
+  ceiling: 0.3,
+  closure: 0.4,
+  door: 0.75,
+  window: 0.18,
+  installation: 0.6,
+};
+
+const EDGE_TYPES = new Set(["wall", "floor", "door", "window"]);
+
+// --- テナント配置用ハッシュ ---
+
+function hashCode(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  }
+  return h;
+}
+
+// --- テナントタイプ → 色 ---
+
+const TYPE_COLORS: Record<string, string> = {
+  convenience: "#44cc44",
+  cafe: "#cc8844",
+  restaurant: "#cc4444",
+  fastfood: "#ff6644",
+  drugstore: "#44aacc",
+  fashion: "#cc44aa",
+  goods: "#aaaa44",
+  book: "#8888cc",
+  beauty: "#cc88cc",
+  service: "#6688aa",
+  food: "#ff8844",
+  other: "#888888",
+};
+
+// --- テナントフロアキー正規化 ---
+
+const AREA_MAP: Record<string, string> = {
+  サブナード: "サブナード",
+  京王モール: "京王モール",
+  京王モールアネックス: "京王",
+  小田急エース: "小田急",
+  JR新宿駅改札内: "JR改札",
+  JR新宿駅新南改札: "JR新南改札",
+  西武新宿駅: "西武",
+  都営新宿西口駅: "都営西口",
+  ルミネ新宿: "ルミネ",
+  西口周辺: "西口周辺",
+};
+
+function normalizeFloorKey(key: string, area: string): string {
+  if (area === "サブナード") return "B2";
+  return key.replace(/F$/, "");
+}
+
+// --- テナントデータ型 ---
+
+interface TenantStore {
+  name: string;
+  area: string;
+  floorKey: string;
+  type: string;
+  icon: string;
+}
+
+interface PlacedTenantPOI {
+  store: TenantStore;
+  floorKey: string;
+  worldPos: THREE.Vector3;
+  sprite: THREE.Sprite;
+}
 
 const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
 async function main() {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const { scene, camera, controls, requestRender } = setupScene(canvas);
+
+  // 新宿駅向けカメラ初期値
+  camera.position.set(150, 120, 200);
+  controls.target.set(0, -10, 0);
+  controls.update();
 
   // 操作ヒント
   const infoPanel = document.getElementById("info-panel")!;
@@ -64,81 +147,229 @@ async function main() {
     }
   });
 
-  // フロアインデックス読み込み
-  const floors = await loadFloorIndex();
+  // --- フロアインデックス読み込み（PLATEAU新宿データ） ---
 
-  // 全フロアデータを並列ロード + ビルド
-  const floorEntries = await Promise.all(
-    floors.map(async (info) => {
-      const data = await loadFloorData(info.key);
-      const built = buildFloor(data);
-      const pois = buildPOILayer(data.facilities, info.key, data.y);
-      return { info, data, built, pois };
-    }),
-  );
+  const indexRes = await fetch("./data/shinjuku_plateau/index.json");
+  const floors: FloorInfo[] = await indexRes.json();
 
-  // シーンに追加
-  const floorGroups = new Map<string, BuiltFloor>();
-  const allClickables: THREE.Mesh[] = [];
+  // --- フロアデータをロード & BufferGeometryメッシュ構築 ---
+
+  const floorGroups = new Map<string, THREE.Group>();
+  const floorEntries: { info: FloorInfo; data: PlateauFloorData }[] = [];
+
+  for (const info of floors) {
+    const res = await fetch(`./data/shinjuku_plateau/${info.key}.json`);
+    const data: PlateauFloorData = await res.json();
+    floorEntries.push({ info, data });
+
+    const group = new THREE.Group();
+
+    // サーフェスタイプごとにマージ
+    const surfacesByType = new Map<string, { vertices: number[]; indices: number[]; indexOffset: number }>();
+
+    for (const surface of data.surfaces) {
+      const t = surface.type;
+      if (!surfacesByType.has(t)) {
+        surfacesByType.set(t, { vertices: [], indices: [], indexOffset: 0 });
+      }
+      const bucket = surfacesByType.get(t)!;
+      const offset = bucket.indexOffset;
+
+      bucket.vertices.push(...surface.vertices);
+      for (const idx of surface.indices) {
+        bucket.indices.push(idx + offset);
+      }
+      bucket.indexOffset += surface.vertices.length / 3;
+    }
+
+    // 各タイプのマージ済みメッシュを生成
+    for (const [type, bucket] of surfacesByType) {
+      if (bucket.vertices.length === 0) continue;
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(bucket.vertices, 3));
+      geometry.setIndex(bucket.indices);
+      geometry.computeVertexNormals();
+
+      const color = SURFACE_COLORS[type] ?? 0x888888;
+      const opacity = SURFACE_OPACITY[type] ?? 0.5;
+
+      const material = new THREE.MeshLambertMaterial({
+        color,
+        transparent: true,
+        opacity,
+        side: THREE.DoubleSide,
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.userData.layer = type;
+      group.add(mesh);
+
+      // エッジアウトライン（壁・床・ドア・窓）
+      if (EDGE_TYPES.has(type)) {
+        const edgeGeom = new THREE.EdgesGeometry(geometry, 30);
+        const edgeColor = type === "door" ? 0x22aa55 : type === "window" ? 0x5599cc : 0x223344;
+        const edgeMat = new THREE.LineBasicMaterial({
+          color: edgeColor,
+          transparent: true,
+          opacity: 0.6,
+        });
+        const edges = new THREE.LineSegments(edgeGeom, edgeMat);
+        group.add(edges);
+      }
+    }
+
+    scene.add(group);
+    floorGroups.set(info.key, group);
+  }
+
+  // --- ドアPOI生成（PLATEAUデータのcentroidから） ---
+
   const allPOIs: POIEntry[] = [];
-  const poiGroupsByFloor = new Map<string, THREE.Group>();
 
-  for (const { info, built, pois } of floorEntries) {
-    scene.add(built.group);
-    floorGroups.set(info.key, built);
-    allClickables.push(...built.clickables);
-
-    // POIスプライトをフロアグループに追加
-    const poiGroup = new THREE.Group();
-    poiGroup.userData.floorKey = info.key;
-    for (const entry of pois) {
-      poiGroup.add(entry.sprite);
-    }
-    built.group.add(poiGroup);
-    poiGroupsByFloor.set(info.key, poiGroup);
-    allPOIs.push(...pois);
-  }
-
-  // テナント情報をオーバーレイ
-  const floorDataMap = new Map<string, FloorData>();
   for (const { info, data } of floorEntries) {
-    floorDataMap.set(info.key, data);
-  }
-  const placedTenants = await loadAndPlaceTenants(floorDataMap);
-  for (const tenant of placedTenants) {
-    const sprite = createTenantSprite(tenant);
-    const built = floorGroups.get(tenant.floorKey);
-    if (built) {
-      built.group.add(sprite);
+    const poiGroup = new THREE.Group();
+    let doorCount = 0;
+    for (const surface of data.surfaces) {
+      if (surface.type !== "door" || !surface.centroid) continue;
+      if (doorCount >= 30) break; // 各フロア最大30ドア
+      doorCount++;
+
+      const [cx, cy, cz] = surface.centroid;
+
+      const poiCanvas = document.createElement("canvas");
+      poiCanvas.width = 64;
+      poiCanvas.height = 64;
+      const ctx = poiCanvas.getContext("2d")!;
+      ctx.beginPath();
+      ctx.arc(32, 32, 30, 0, Math.PI * 2);
+      ctx.fillStyle = "#33cc77";
+      ctx.globalAlpha = 0.85;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.font = "28px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#fff";
+      ctx.fillText("🚪", 32, 33);
+
+      const texture = new THREE.CanvasTexture(poiCanvas);
+      const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, sizeAttenuation: true });
+      const sprite = new THREE.Sprite(mat);
+      const worldPos = new THREE.Vector3(cx, cy + 1, cz);
+      sprite.position.copy(worldPos);
+      sprite.scale.set(4, 4, 1);
+      poiGroup.add(sprite);
+
+      allPOIs.push({
+        sprite,
+        facility: {
+          geometry: { type: "Point", coordinates: [cx, -cz] },
+          category: "DOOR",
+          area: `${info.label}`,
+          name: "ドア",
+        },
+        floorKey: info.key,
+        worldPos,
+        label: `ドア (${info.label})`,
+        categoryLabel: "ドア",
+      });
     }
+    const floorGroup = floorGroups.get(info.key);
+    if (floorGroup) floorGroup.add(poiGroup);
   }
 
-  // 検索インデックス構築（テナント情報も統合）
-  buildSearchIndex(allPOIs, placedTenants);
+  // --- テナント情報読み込み & floor surface centroidベースで配置 ---
+
+  const tenantPOIs: PlacedTenantPOI[] = [];
+  try {
+    const tenantRes = await fetch("./data/tenants.json");
+    if (tenantRes.ok) {
+      const tenantData = await tenantRes.json();
+      const stores: TenantStore[] = tenantData.stores || [];
+
+      for (const store of stores) {
+        const floorKey = normalizeFloorKey(store.floorKey, store.area);
+        const floorGroup = floorGroups.get(floorKey);
+        if (!floorGroup) continue;
+
+        // フロアデータからfloorサーフェスのcentroidを取得
+        const floorData = floorEntries.find(e => e.info.key === floorKey);
+        if (!floorData) continue;
+        const floorSurfaces = floorData.data.surfaces.filter(s => s.type === "floor" && s.centroid);
+        if (floorSurfaces.length === 0) continue;
+
+        // ハッシュベースでfloorサーフェスの重心に配置
+        const idx = Math.abs(hashCode(store.name)) % floorSurfaces.length;
+        const centroid = floorSurfaces[idx].centroid!;
+
+        const tenantCanvas = document.createElement("canvas");
+        tenantCanvas.width = 256;
+        tenantCanvas.height = 80;
+        const ctx = tenantCanvas.getContext("2d")!;
+        ctx.fillStyle = TYPE_COLORS[store.type] ?? "#888888";
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(0, 0, 256, 80);
+        ctx.globalAlpha = 1;
+        ctx.font = "32px sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#fff";
+        ctx.fillText(store.icon, 8, 40);
+        ctx.font = "bold 22px sans-serif";
+        const name = store.name.length > 10 ? store.name.slice(0, 10) + "…" : store.name;
+        ctx.fillText(name, 48, 40);
+
+        const texture = new THREE.CanvasTexture(tenantCanvas);
+        const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, sizeAttenuation: true });
+        const sprite = new THREE.Sprite(mat);
+        const worldPos = new THREE.Vector3(centroid[0], centroid[1] + 2, centroid[2]);
+        sprite.position.copy(worldPos);
+        sprite.scale.set(14, 4.5, 1);
+        floorGroup.add(sprite);
+
+        const dataArea = AREA_MAP[store.area] ?? store.area;
+        const poiEntry: POIEntry = {
+          sprite,
+          facility: {
+            geometry: { type: "Point", coordinates: [worldPos.x, -worldPos.z] },
+            category: "TENANT",
+            area: dataArea,
+            name: store.name,
+          },
+          floorKey,
+          worldPos,
+          label: `${dataArea} - ${store.name}`,
+          categoryLabel: store.type,
+        };
+        allPOIs.push(poiEntry);
+
+        tenantPOIs.push({
+          store,
+          floorKey,
+          worldPos,
+          sprite,
+        });
+      }
+    }
+  } catch { /* テナントデータがなくても動作する */ }
+
+  // --- 検索インデックス構築（ドアPOI + テナントPOI統合） ---
+
+  buildSearchIndex(allPOIs);
 
   requestRender();
 
-  // フロア切替UI
+  // --- フロア切替UI ---
+
   let currentActiveFloors: Set<string>;
   setupFloorSelector(floors, onFloorChange);
   currentActiveFloors = new Set(floors.map((f) => f.key));
 
   function onFloorChange(active: Set<string>) {
     currentActiveFloors = active;
-    const isAll = active.size === floors.length;
-    for (const [key, built] of floorGroups) {
-      const visible = active.has(key);
-      built.group.visible = visible;
-
-      built.group.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshLambertMaterial) {
-          if (child.userData.layer === "floor") {
-            child.material.opacity = isAll ? 0.4 : visible ? 0.5 : 0.1;
-          } else if (child.userData.layer === "space") {
-            child.material.opacity = isAll ? 0.75 : visible ? 0.85 : 0.1;
-          }
-        }
-      });
+    for (const [key, group] of floorGroups) {
+      group.visible = active.has(key);
     }
 
     if (active.size === 1) {
@@ -146,12 +377,13 @@ async function main() {
       const info = floors.find((f) => f.key === key);
       if (info) controls.target.set(0, info.y, 0);
     } else {
-      controls.target.set(0, 0, 0);
+      controls.target.set(0, -10, 0);
     }
     requestRender();
   }
 
-  // 検索UI
+  // --- 検索UI ---
+
   setupSearchPanel((item) => {
     // 該当フロアを表示
     const active = new Set([item.floorKey]);
@@ -173,12 +405,16 @@ async function main() {
     showDetail(item.poiEntry);
   });
 
-  // ネットワークデータ読み込み + 経路検索UI
-  await loadNetwork();
+  // --- ネットワークデータ読み込み + 経路検索UI ---
+
+  try {
+    await loadNetwork("./data/network.json");
+  } catch {
+    console.warn("ネットワークデータが見つかりません（経路検索は無効）");
+  }
 
   const routeUI = setupRoutePanel(
     (req) => {
-      // 出発・到着のPOI座標から最近傍ノードを探索
       const startNode = findNearestNode(
         req.start.worldPos.x, req.start.worldPos.y, -req.start.worldPos.z,
       );
@@ -199,7 +435,7 @@ async function main() {
         return;
       }
 
-      // B5: 経路が通るフロアのみ表示
+      // 経路が通るフロアのみ表示
       const routeFloors = [...new Set(result.path.map((n) => n.floor))];
       const routeActive = new Set(routeFloors);
       onFloorChange(routeActive);
@@ -213,7 +449,7 @@ async function main() {
       // 経路描画
       renderRoute(scene, result, requestRender);
 
-      // B2: フロア別ステップ生成
+      // フロア別ステップ生成
       const steps = buildRouteSteps(result);
       routeUI.showResult(result.totalDistance, routeFloors, steps);
 
@@ -246,10 +482,10 @@ async function main() {
     },
   );
 
-  // 現在地特定パネル
+  // --- 現在地特定パネル ---
+
   let locateMarker: THREE.Mesh | null = null;
   setupLocatePanel(allPOIs, (result) => {
-    // 該当フロアを表示
     const active = new Set([result.floorKey]);
     onFloorChange(active);
     document.querySelectorAll<HTMLButtonElement>(".floor-btn[data-floor-key]").forEach((btn) => {
@@ -281,12 +517,39 @@ async function main() {
 
     // カメラ移動
     animateCameraTo(camera, controls, result.position, requestRender);
-  }, placedTenants);
+  });
 
-  // ツールチップ
+  // --- ツールチップ ---
+
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const tooltip = document.getElementById("tooltip")!;
+
+  const typeNames: Record<string, string> = {
+    wall: "壁",
+    floor: "床",
+    ceiling: "天井",
+    closure: "閉鎖面",
+    door: "ドア",
+    window: "窓",
+    installation: "設備",
+  };
+
+  function showTooltip(text: string, clientX: number, clientY: number) {
+    tooltip.textContent = text;
+    tooltip.style.display = "block";
+    if (isTouchDevice) {
+      tooltip.style.left = "50%";
+      tooltip.style.transform = "translateX(-50%)";
+      tooltip.style.top = "auto";
+      tooltip.style.bottom = "50px";
+    } else {
+      tooltip.style.left = clientX + 15 + "px";
+      tooltip.style.top = clientY - 10 + "px";
+      tooltip.style.transform = "";
+      tooltip.style.bottom = "";
+    }
+  }
 
   function handlePointerHit(clientX: number, clientY: number) {
     pointer.x = (clientX / window.innerWidth) * 2 - 1;
@@ -308,37 +571,23 @@ async function main() {
       }
     }
 
-    // Space hitbox
-    const hitboxes = allClickables.filter(
-      (m) => m.userData.layer === "space-hitbox" && m.parent?.visible,
-    );
-    const intersects = raycaster.intersectObjects(hitboxes);
+    // メッシュhit（サーフェスタイプ名を表示）
+    const meshes: THREE.Mesh[] = [];
+    for (const [, group] of floorGroups) {
+      if (!group.visible) continue;
+      group.traverse((child) => {
+        if (child instanceof THREE.Mesh) meshes.push(child);
+      });
+    }
+
+    const intersects = raycaster.intersectObjects(meshes);
     if (intersects.length > 0) {
-      const ud = intersects[0].object.userData;
-      const catName = CATEGORY_NAMES[ud.category] || ud.group || "";
-      const name = ud.name || catName;
-      const label = name ? `${ud.area} - ${name}` : ud.area;
-      showTooltip(label, clientX, clientY);
+      const layer = intersects[0].object.userData.layer;
+      showTooltip(typeNames[layer] || layer, clientX, clientY);
       return;
     }
 
     tooltip.style.display = "none";
-  }
-
-  function showTooltip(text: string, clientX: number, clientY: number) {
-    tooltip.textContent = text;
-    tooltip.style.display = "block";
-    if (isTouchDevice) {
-      tooltip.style.left = "50%";
-      tooltip.style.transform = "translateX(-50%)";
-      tooltip.style.top = "auto";
-      tooltip.style.bottom = "50px";
-    } else {
-      tooltip.style.left = clientX + 15 + "px";
-      tooltip.style.top = clientY - 10 + "px";
-      tooltip.style.transform = "";
-      tooltip.style.bottom = "";
-    }
   }
 
   // POIタップで詳細表示

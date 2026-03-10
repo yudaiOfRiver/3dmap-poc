@@ -1,0 +1,44 @@
+[
+  {
+    "key": "B4",
+    "ordinal": -4.0,
+    "y": -20.0,
+    "label": "B4F"
+  },
+  {
+    "key": "B3",
+    "ordinal": -3.0,
+    "y": -15.0,
+    "label": "B3F"
+  },
+  {
+    "key": "B2",
+    "ordinal": -2.0,
+    "y": -10.0,
+    "label": "B2F"
+  },
+  {
+    "key": "B1",
+    "ordinal": -1.0,
+    "y": -5.0,
+    "label": "B1F"
+  },
+  {
+    "key": "0",
+    "ordinal": 0.0,
+    "y": 0.0,
+    "label": "0F"
+  },
+  {
+    "key": "1",
+    "ordinal": 1.0,
+    "y": 5.0,
+    "label": "1F"
+  },
+  {
+    "key": "2",
+    "ordinal": 2.0,
+    "y": 10.0,
+    "label": "2F"
+  }
+]
