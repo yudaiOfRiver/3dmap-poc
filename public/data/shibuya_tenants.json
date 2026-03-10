@@ -1,0 +1,921 @@
+{
+  "stores": [
+    {
+      "name": "スターバックス コーヒー 東急フードショー店",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ゴディバ",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍫"
+    },
+    {
+      "name": "アンリ・シャルパンティエ",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "ヨックモック",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "キハチ",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "叶 匠壽庵",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍡"
+    },
+    {
+      "name": "とらや",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍡"
+    },
+    {
+      "name": "RF1",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🥗"
+    },
+    {
+      "name": "まい泉",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "柿安ダイニング",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "銀座若菜",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🥒"
+    },
+    {
+      "name": "メゾンカイザー",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "ジュウニブンベーカリー",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "成城石井",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "プレッセ",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "つばめグリル",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "崎陽軒",
+      "area": "東急フードショー",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🥟"
+    },
+    {
+      "name": "スターバックス コーヒー 渋谷マークシティ店",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ドトールコーヒーショップ",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ファミリーマート 渋谷マークシティ店",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "マツモトキヨシ",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "QBハウス",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💈"
+    },
+    {
+      "name": "ミスターミニット",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🔧"
+    },
+    {
+      "name": "京王ストア",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "箱根そば",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "神戸屋キッチン",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "セブン-イレブン 渋谷ちかみち店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "ファミリーマート 渋谷地下街店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "ドトールコーヒーショップ 渋谷地下街店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ベックスコーヒーショップ",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "カフェ・ド・クリエ",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ココカラファイン",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "セブン銀行ATM",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🏧"
+    },
+    {
+      "name": "宝くじ売り場",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🎫"
+    },
+    {
+      "name": "ローソン 渋谷駅前店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "渋谷ShinQs ビューティーパレット",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💄"
+    },
+    {
+      "name": "ロクシタン",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "🧴"
+    },
+    {
+      "name": "SABON",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "🧴"
+    },
+    {
+      "name": "コスメキッチン",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💄"
+    },
+    {
+      "name": "THREE",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💄"
+    },
+    {
+      "name": "スターバックス コーヒー 渋谷ヒカリエ店",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ディーン&デルーカ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "ピエール・エルメ・パリ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "パティスリー サダハル アオキ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "フォション",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "グラマシーニューヨーク",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "リンツ ショコラ ブティック",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍫"
+    },
+    {
+      "name": "ガトーフェスタ ハラダ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "ル・パン・コティディアン",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "日本橋 千疋屋総本店",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍇"
+    },
+    {
+      "name": "銀座あけぼの",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍡"
+    },
+    {
+      "name": "TORAYA CAFÉ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "東横のれん街 築地寿司清",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "restaurant",
+      "icon": "🍣"
+    },
+    {
+      "name": "東横のれん街 天ぷら船橋屋",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "東横のれん街 とんかつまい泉",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "東横のれん街 浅草今半",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "東横のれん街 笹八",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍙"
+    },
+    {
+      "name": "渋谷スクランブルスクエア ツタヤブックストア",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B1",
+      "type": "book",
+      "icon": "📚"
+    },
+    {
+      "name": "スターバックス コーヒー スクランブルスクエア店",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ファミリーマート スクランブルスクエア店",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "紀ノ国屋",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "BOUL'ANGE",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "Made in ピエール・エルメ",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "バターステイツ by銀のぶどう",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "プレスバターサンド",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "Chateraise PREMIUM YATSUDOKI",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "ザ・スウィーツ",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "柿安本店",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "新宿 さぼてん",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "日本橋 天丼 金子半之助",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "タリーズコーヒー",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "NewDays 渋谷駅",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "BECK'S COFFEE SHOP 渋谷店",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "駅弁屋 祭 渋谷店",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "そばいち",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "エキュート渋谷 ワイアードカフェ",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "BOOK EXPRESS 渋谷店",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "book",
+      "icon": "📚"
+    },
+    {
+      "name": "アフタヌーンティー・ティースタンド",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "東京ばな奈",
+      "area": "JR渋谷駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍌"
+    },
+    {
+      "name": "セブン-イレブン 東京メトロ渋谷駅店",
+      "area": "東京メトロ渋谷駅",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "ローソン メトロス渋谷店",
+      "area": "東京メトロ渋谷駅",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "メトロス渋谷 ドトール",
+      "area": "東京メトロ渋谷駅",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "エチカ表参道 渋谷方面改札",
+      "area": "東京メトロ渋谷駅",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "ナチュラルローソン メトロ渋谷店",
+      "area": "東京メトロ渋谷駅",
+      "floorKey": "B2",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "東急ストア 東横店",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "ファミリーマート 東急渋谷駅店",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "しぶそば",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "ドトールコーヒーショップ 渋谷東急東横店",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "セブン-イレブン 東急渋谷駅店",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "ローソン 田園都市線渋谷駅店",
+      "area": "東急田園都市線渋谷駅",
+      "floorKey": "B3",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "東急ベーカリー",
+      "area": "東急田園都市線渋谷駅",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "Soup Stock Tokyo 渋谷駅店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "カレーハウスCoCo壱番屋",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍛"
+    },
+    {
+      "name": "マクドナルド 渋谷駅前店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍔"
+    },
+    {
+      "name": "日高屋 渋谷地下鉄口店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "松屋 渋谷店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍚"
+    },
+    {
+      "name": "JINS 渋谷地下街店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "👓"
+    },
+    {
+      "name": "Francfranc BAZAR",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "PLAZA",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🎁"
+    },
+    {
+      "name": "アクセソワ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👜"
+    },
+    {
+      "name": "3COINS",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "goods",
+      "icon": "🎁"
+    },
+    {
+      "name": "ザ ボディショップ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "beauty",
+      "icon": "🧴"
+    },
+    {
+      "name": "SHIRO",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💄"
+    },
+    {
+      "name": "サマンサタバサ",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B2",
+      "type": "fashion",
+      "icon": "👜"
+    },
+    {
+      "name": "ユナイテッドアローズ グリーンレーベルリラクシング",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "無印良品",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "カルディコーヒーファーム",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🫘"
+    },
+    {
+      "name": "銀座コージーコーナー",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "551HORAI 蓬莱",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🥟"
+    },
+    {
+      "name": "治一郎",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B2",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "ダイソー 渋谷マークシティ店",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "SHIPS 渋谷マークシティ店",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "Zoff 渋谷マークシティ店",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "👓"
+    },
+    {
+      "name": "ケユカ",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "銀だこ",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🐙"
+    },
+    {
+      "name": "おにぎり権兵衛",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍙"
+    },
+    {
+      "name": "築地銀だこハイボール酒場",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "restaurant",
+      "icon": "🍺"
+    },
+    {
+      "name": "崎陽軒 渋谷東急東横店",
+      "area": "東急東横線渋谷駅",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🥟"
+    },
+    {
+      "name": "ガリレオ 外貨両替",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "💱"
+    },
+    {
+      "name": "ほけんの窓口",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🏢"
+    },
+    {
+      "name": "東横のれん街 日本橋 弁松総本店",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "東横のれん街 岡埜栄泉",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍡"
+    },
+    {
+      "name": "東横のれん街 人形町今半",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🥩"
+    },
+    {
+      "name": "東横のれん街 船橋屋",
+      "area": "渋谷ヒカリエ ShinQs",
+      "floorKey": "B3",
+      "type": "food",
+      "icon": "🍡"
+    },
+    {
+      "name": "吉野家 渋谷駅前店",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍚"
+    },
+    {
+      "name": "はなまるうどん",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍜"
+    },
+    {
+      "name": "ABCマート 渋谷マークシティ店",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👟"
+    },
+    {
+      "name": "東急ハンズ ミニ",
+      "area": "渋谷スクランブルスクエア",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "サンドラッグ",
+      "area": "渋谷ちかみち",
+      "floorKey": "B1",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "東急ステーションリテールサービス",
+      "area": "東急田園都市線渋谷駅",
+      "floorKey": "B2",
+      "type": "service",
+      "icon": "🏢"
+    },
+    {
+      "name": "フレッシュネスバーガー",
+      "area": "渋谷マークシティ",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍔"
+    }
+  ]
+}

@@ -7,10 +7,13 @@ import { setupFloorSelector } from "./ui/floor-selector";
 import { setupSearchPanel } from "./ui/search-panel";
 import { showDetail } from "./ui/info-panel";
 import { buildSearchIndex } from "./data/search";
-import { animateCameraTo } from "./utils/camera-animation";
-import { loadNetwork, findNearestNode, findRoute } from "./data/network";
+import { animateCameraTo, moveCameraToFirstPerson, moveCameraToBirdEye } from "./utils/camera-animation";
+import { loadNetwork, findNearestNode, findRoute, buildRouteSteps } from "./data/network";
 import { setupRoutePanel } from "./ui/route-panel";
-import { renderRoute, clearRoute } from "./scene/route-renderer";
+import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
+import { setupLocatePanel } from "./ui/locate-panel";
+import { loadAndPlaceTenants, createTenantSprite } from "./data/tenant-loader";
+import type { FloorData } from "./data/loader";
 import "./style.css";
 
 // Spaceカテゴリコードの日本語名
@@ -96,8 +99,22 @@ async function main() {
     allPOIs.push(...pois);
   }
 
-  // 検索インデックス構築
-  buildSearchIndex(allPOIs);
+  // テナント情報をオーバーレイ
+  const floorDataMap = new Map<string, FloorData>();
+  for (const { info, data } of floorEntries) {
+    floorDataMap.set(info.key, data);
+  }
+  const placedTenants = await loadAndPlaceTenants(floorDataMap);
+  for (const tenant of placedTenants) {
+    const sprite = createTenantSprite(tenant);
+    const built = floorGroups.get(tenant.floorKey);
+    if (built) {
+      built.group.add(sprite);
+    }
+  }
+
+  // 検索インデックス構築（テナント情報も統合）
+  buildSearchIndex(allPOIs, placedTenants);
 
   requestRender();
 
@@ -174,36 +191,97 @@ async function main() {
         return;
       }
 
-      const result = findRoute(startNode.id, endNode.id);
+      const result = findRoute(startNode.id, endNode.id, {
+        avoidStairs: req.barrierFree,
+      });
       if (!result) {
         routeUI.showError();
         return;
       }
 
-      // 全フロア表示に切替
-      const allActive = new Set(floors.map((f) => f.key));
-      onFloorChange(allActive);
-      document.querySelectorAll<HTMLButtonElement>(".floor-btn").forEach((btn) => {
-        btn.classList.add("active");
+      // B5: 経路が通るフロアのみ表示
+      const routeFloors = [...new Set(result.path.map((n) => n.floor))];
+      const routeActive = new Set(routeFloors);
+      onFloorChange(routeActive);
+      document.querySelectorAll<HTMLButtonElement>(".floor-btn[data-floor-key]").forEach((btn) => {
+        btn.classList.toggle("active", routeActive.has(btn.dataset.floorKey!));
+      });
+      document.querySelectorAll<HTMLButtonElement>(".floor-btn:not([data-floor-key])").forEach((btn) => {
+        btn.classList.remove("active");
       });
 
       // 経路描画
       renderRoute(scene, result, requestRender);
 
-      // 経路に含まれるフロアを収集
-      const routeFloors = [...new Set(result.path.map((n) => n.floor))];
-      routeUI.showResult(result.totalDistance, routeFloors);
+      // B2: フロア別ステップ生成
+      const steps = buildRouteSteps(result);
+      routeUI.showResult(result.totalDistance, routeFloors, steps);
 
-      // カメラを経路の中間点に移動
-      const mid = result.path[Math.floor(result.path.length / 2)];
-      const midPos = new THREE.Vector3(mid.x, mid.y + 2, -mid.z);
-      animateCameraTo(camera, controls, midPos, requestRender);
+      // 出発点の一人称視点に移動
+      const startPath = result.path[0];
+      const nextPath = result.path[Math.min(3, result.path.length - 1)];
+      let isFirstPerson = true;
+      moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+
+      // 視点切替ボタンのハンドラ
+      const toggleBtn = getViewToggleButton();
+      if (toggleBtn) {
+        toggleBtn.textContent = "🦅 鳥瞰";
+        toggleBtn.onclick = () => {
+          if (isFirstPerson) {
+            moveCameraToBirdEye(camera, controls, requestRender);
+            toggleBtn.textContent = "👁 目線";
+            isFirstPerson = false;
+          } else {
+            moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+            toggleBtn.textContent = "🦅 鳥瞰";
+            isFirstPerson = true;
+          }
+        };
+      }
     },
     () => {
       clearRoute(scene);
       requestRender();
     },
   );
+
+  // 現在地特定パネル
+  let locateMarker: THREE.Mesh | null = null;
+  setupLocatePanel(allPOIs, (result) => {
+    // 該当フロアを表示
+    const active = new Set([result.floorKey]);
+    onFloorChange(active);
+    document.querySelectorAll<HTMLButtonElement>(".floor-btn[data-floor-key]").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.floorKey === result.floorKey);
+    });
+    document.querySelectorAll<HTMLButtonElement>(".floor-btn:not([data-floor-key])").forEach((btn) => {
+      btn.classList.remove("active");
+    });
+
+    // 既存マーカーを削除
+    if (locateMarker) {
+      scene.remove(locateMarker);
+      locateMarker.geometry.dispose();
+      (locateMarker.material as THREE.Material).dispose();
+      locateMarker = null;
+    }
+
+    // 現在地マーカーを配置（青い光る円柱）
+    const markerGeom = new THREE.CylinderGeometry(2.5, 2.5, 0.5, 16);
+    const markerMat = new THREE.MeshBasicMaterial({
+      color: 0x44aaff,
+      transparent: true,
+      opacity: 0.7,
+    });
+    locateMarker = new THREE.Mesh(markerGeom, markerMat);
+    locateMarker.position.copy(result.position);
+    locateMarker.position.y += 0.5;
+    scene.add(locateMarker);
+
+    // カメラ移動
+    animateCameraTo(camera, controls, result.position, requestRender);
+  }, placedTenants);
 
   // ツールチップ
   const raycaster = new THREE.Raycaster();

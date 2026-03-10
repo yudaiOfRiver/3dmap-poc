@@ -1,0 +1,991 @@
+{
+  "stores": [
+    {
+      "name": "スターバックスコーヒー",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ドトールコーヒーショップ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "オスロコーヒー",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "カフェ・ベローチェ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "カフェ・ハイチ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ダイソー",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "QBハウス",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💈"
+    },
+    {
+      "name": "コクミンドラッグ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "JINS",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "👓"
+    },
+    {
+      "name": "楽天モバイル",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "📱"
+    },
+    {
+      "name": "サーティワン アイスクリーム",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍦"
+    },
+    {
+      "name": "お酒の美術館",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍷"
+    },
+    {
+      "name": "AFURI 辛紅",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "すし銚子丸 Shinjuku",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍣"
+    },
+    {
+      "name": "とんかつ和幸",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "ねぎし",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "卵と私",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "洋麵屋五右衛門",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍝"
+    },
+    {
+      "name": "ぼてぢゅう",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "バンビ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "吉祥庵",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "台湾小籠包",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🥟"
+    },
+    {
+      "name": "鶏五味",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "土鍋カリーぼんた",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍛"
+    },
+    {
+      "name": "大阪 くり田",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "新宿 秀山",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "ジュピター",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🫘"
+    },
+    {
+      "name": "北海道どさんこプラザ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "ミスターミニット",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🔧"
+    },
+    {
+      "name": "ほけんの窓口",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🏢"
+    },
+    {
+      "name": "ガリレオ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "💱"
+    },
+    {
+      "name": "Jマーケット",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🎫"
+    },
+    {
+      "name": "スマホスピタル",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "📱"
+    },
+    {
+      "name": "ハニーズ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "ロペピクニック",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "リーガルシューズ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👞"
+    },
+    {
+      "name": "ジュエリー ツツミ",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "💎"
+    },
+    {
+      "name": "日比谷花壇",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "💐"
+    },
+    {
+      "name": "オグラ眼鏡店",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "👓"
+    },
+    {
+      "name": "エクセル美容室",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💇"
+    },
+    {
+      "name": "DASHING DIVA",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💅"
+    },
+    {
+      "name": "Dr.stretch",
+      "area": "サブナード",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🏃"
+    },
+    {
+      "name": "イレブンイマサ",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍛"
+    },
+    {
+      "name": "陳麻婆豆腐 麺飯館",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "粥餐庁",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "十割蕎麦さがたに",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "こめらく",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍚"
+    },
+    {
+      "name": "立食い寿司みさき",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍣"
+    },
+    {
+      "name": "どうとんぼり神座",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "吉野家",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍚"
+    },
+    {
+      "name": "つけめんTETSU",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "UDONつるこし",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "カフェルノアール",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "チケット大黒屋",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🎫"
+    },
+    {
+      "name": "ロペピクニック",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "リモーネプラス",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "サンドラッグ",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "ドトールコーヒーショップ",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "眼鏡市場",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "👓"
+    },
+    {
+      "name": "セブン銀行ATM",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🏧"
+    },
+    {
+      "name": "ジュエリーツツミ",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "💎"
+    },
+    {
+      "name": "アシックスウォーキング",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👟"
+    },
+    {
+      "name": "WA ORiental Traffic",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👠"
+    },
+    {
+      "name": "グリーンパークスサラ",
+      "area": "京王モール",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "ダイソー",
+      "area": "京王モールアネックス",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🏬"
+    },
+    {
+      "name": "QBハウス",
+      "area": "京王モールアネックス",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💈"
+    },
+    {
+      "name": "アトリエはるか",
+      "area": "京王モールアネックス",
+      "floorKey": "B1",
+      "type": "beauty",
+      "icon": "💇"
+    },
+    {
+      "name": "ドトールコーヒーショップ",
+      "area": "京王モールアネックス",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "カ・ラ・ダ ファクトリー",
+      "area": "京王モールアネックス",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🏃"
+    },
+    {
+      "name": "ファミリーマート",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "セブン-イレブン",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "スターバックス コーヒー",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "OSLO COFFEE",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "カフェテラス シルエット",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "ココカラファイン薬局",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "JINS",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "👓"
+    },
+    {
+      "name": "クリスピー・クリーム・ドーナツ",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍩"
+    },
+    {
+      "name": "ビアードパパ",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍩"
+    },
+    {
+      "name": "ゴディバ",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍫"
+    },
+    {
+      "name": "リンツ ショコラ ブティック",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍫"
+    },
+    {
+      "name": "ポンパドウル",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "ミニヨン",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "とんかつ新宿さぼてん",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍽️"
+    },
+    {
+      "name": "洋麺屋 五右衛門",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍝"
+    },
+    {
+      "name": "箱根そば本陣",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "新和そば",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "だし茶漬け＋肉うどん えん",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍚"
+    },
+    {
+      "name": "ZETTERIA",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "fastfood",
+      "icon": "🍔"
+    },
+    {
+      "name": "#新宿地下ラーメン",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "日産レンタカー",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "service",
+      "icon": "🚗"
+    },
+    {
+      "name": "HIBIYA KADAN",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "💐"
+    },
+    {
+      "name": "チュチュアンナ",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "fashion",
+      "icon": "🧦"
+    },
+    {
+      "name": "ポップマート",
+      "area": "小田急エース",
+      "floorKey": "B1",
+      "type": "goods",
+      "icon": "🧸"
+    },
+    {
+      "name": "BECK'S COFFEE SHOP",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "NewDays 新宿西改札内",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "成城石井",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🏪"
+    },
+    {
+      "name": "BAKERs' Symphony",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "BUNNY BREAD",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "BLOSSOM&BOUQUET TOKYO",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🥪"
+    },
+    {
+      "name": "らーめん鴨to葱",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "そばいち",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "立鮨 すし横",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍣"
+    },
+    {
+      "name": "バンコク屋台 カオサン",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍜"
+    },
+    {
+      "name": "お茶漬けおにぎり 山本山",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "restaurant",
+      "icon": "🍙"
+    },
+    {
+      "name": "RF1/神戸コロッケ",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "つばめグリルDELI",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍱"
+    },
+    {
+      "name": "治一郎",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "岡田謹製 あんバタ屋",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "八 by PRESS BUTTER SAND",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "MERCER BAKESHOP",
+      "area": "JR新宿駅改札内",
+      "floorKey": "B1",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "NewDays 新宿南口",
+      "area": "JR新宿駅改札内",
+      "floorKey": "2F",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "BECK'S COFFEE SHOP 新宿南口",
+      "area": "JR新宿駅改札内",
+      "floorKey": "2F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "タリーズコーヒーSELECT",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "BOOK COMPASS",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "book",
+      "icon": "📚"
+    },
+    {
+      "name": "PAUL",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "サンドイッチハウス メルヘン",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🥪"
+    },
+    {
+      "name": "キャラメルゴーストハウス",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "Butter Butler",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍰"
+    },
+    {
+      "name": "ICHIBIKO",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍓"
+    },
+    {
+      "name": "米屋のおにぎり屋 菊太屋米穀店",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍙"
+    },
+    {
+      "name": "BEAMS NEWS",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "NewDays 新宿新南口",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "ブルーボトルコーヒー",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "1F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "スターバックス コーヒー 新宿新南口店",
+      "area": "JR新宿駅新南改札",
+      "floorKey": "2F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "スターバックス コーヒー",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "セガフレード・ザネッティ",
+      "area": "西武新宿駅",
+      "floorKey": "1F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "クリスピー・クリーム・ドーナツ",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍩"
+    },
+    {
+      "name": "ビアードパパ",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍩"
+    },
+    {
+      "name": "墨繪",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🍞"
+    },
+    {
+      "name": "サラダデリ マルゴ",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "food",
+      "icon": "🥗"
+    },
+    {
+      "name": "だし茶漬け＋肉うどん えん",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "restaurant",
+      "icon": "🍚"
+    },
+    {
+      "name": "プレミィ・コロミィ",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "goods",
+      "icon": "🎁"
+    },
+    {
+      "name": "ミスターミニット",
+      "area": "西武新宿駅",
+      "floorKey": "2F",
+      "type": "service",
+      "icon": "🔧"
+    },
+    {
+      "name": "ABCマート",
+      "area": "西武新宿駅",
+      "floorKey": "3F",
+      "type": "fashion",
+      "icon": "👟"
+    },
+    {
+      "name": "GU",
+      "area": "西武新宿駅",
+      "floorKey": "3F",
+      "type": "fashion",
+      "icon": "👗"
+    },
+    {
+      "name": "スリーコインズプラス",
+      "area": "西武新宿駅",
+      "floorKey": "3F",
+      "type": "goods",
+      "icon": "🎁"
+    },
+    {
+      "name": "アインズ&トルペ",
+      "area": "西武新宿駅",
+      "floorKey": "3F",
+      "type": "drugstore",
+      "icon": "💊"
+    },
+    {
+      "name": "リラク",
+      "area": "西武新宿駅",
+      "floorKey": "1F",
+      "type": "service",
+      "icon": "🏃"
+    },
+    {
+      "name": "ファミリーマート",
+      "area": "都営新宿西口駅",
+      "floorKey": "B3",
+      "type": "convenience",
+      "icon": "🏪"
+    },
+    {
+      "name": "スターバックス コーヒー",
+      "area": "ルミネ新宿",
+      "floorKey": "1F",
+      "type": "cafe",
+      "icon": "☕"
+    },
+    {
+      "name": "NewDays",
+      "area": "西口周辺",
+      "floorKey": "B1",
+      "type": "convenience",
+      "icon": "🏪"
+    }
+  ]
+}

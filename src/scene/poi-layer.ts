@@ -30,7 +30,7 @@ const POI_CONFIG: Record<string, { icon: string; color: string; label: string }>
 };
 
 // 非表示にするカテゴリ（階段は数が多すぎるので間引く）
-const HIDDEN_CATEGORIES = new Set(["F011"]);
+const HIDDEN_CATEGORIES = new Set<string>();
 
 export interface POIEntry {
   sprite: THREE.Sprite;
@@ -94,8 +94,20 @@ export function buildPOILayer(
 ): POIEntry[] {
   const entries: POIEntry[] = [];
 
+  // F011（階段）の間引きカウンター
+  const stairCount = new Map<string, number>(); // key: area
+  const MAX_STAIRS_PER_AREA = 2;
+
   for (const fac of facilities) {
     if (HIDDEN_CATEGORIES.has(fac.category)) continue;
+
+    // F011の間引き: 各エリアで最大2件のみ表示
+    if (fac.category === "F011") {
+      const key = fac.area || "unknown";
+      const count = stairCount.get(key) ?? 0;
+      if (count >= MAX_STAIRS_PER_AREA) continue;
+      stairCount.set(key, count + 1);
+    }
 
     const config = POI_CONFIG[fac.category];
     if (!config) continue;

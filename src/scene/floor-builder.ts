@@ -7,7 +7,7 @@ import { geoToShapes } from "../utils/geo-to-mesh";
 const GROUP_COLORS: Record<string, number> = {
   walkway: 0x4488ff,    // 通路/コンコース
   ticket: 0x44cc88,     // 改札内・きっぷ売り場
-  shop: 0xffaa44,       // 商業施設
+  shop: 0xff8800,       // 商業施設
   stairs: 0xff6666,     // 階段・EV・エスカ・スロープ
   elevator: 0xff6666,
   escalator: 0xff6666,
@@ -23,7 +23,24 @@ const GROUP_COLORS: Record<string, number> = {
 const FLOOR_COLOR = 0x555566;
 const FIXTURE_COLOR = 0x666680;
 const EXTRUDE_HEIGHT = 3.0;
-const FLOOR_THICKNESS = 0.3;
+const FLOOR_THICKNESS = 0.5;
+
+// A1: カテゴリ別押し出し高さ
+const GROUP_HEIGHTS: Record<string, number> = {
+  walkway: 3.0,
+  platform: 5.0,
+  stairs: 2.0,
+  elevator: 3.5,
+  escalator: 2.5,
+  shop: 3.5,
+  ticket: 3.0,
+  info: 3.0,
+  toilet: 2.8,
+  office: 3.0,
+  public: 2.5,
+  room: 2.5,
+  other: 2.5,
+};
 
 export interface BuiltFloor {
   group: THREE.Group;
@@ -58,19 +75,34 @@ export function buildFloor(data: FloorData): BuiltFloor {
       mesh.rotation.x = -Math.PI / 2;
       mesh.userData.layer = "floor";
       group.add(mesh);
+
+      // A4: フロアスラブのエッジライン
+      const floorEdges = new THREE.EdgesGeometry(merged, 15);
+      const floorEdgeMat = new THREE.LineBasicMaterial({
+        color: 0x778899,
+        transparent: true,
+        opacity: 0.3,
+      });
+      const floorEdgeLine = new THREE.LineSegments(floorEdges, floorEdgeMat);
+      floorEdgeLine.position.y = baseY;
+      floorEdgeLine.rotation.x = -Math.PI / 2;
+      floorEdgeLine.userData.layer = "floor-edge";
+      group.add(floorEdgeLine);
+
       floorGeoms.forEach((g) => g.dispose());
     }
   }
 
-  // 2. Space（グループごとにマージ）
+  // 2. Space（グループごとにマージ、カテゴリ別高さ）
   const spacesByGroup = new Map<string, THREE.BufferGeometry[]>();
 
   for (const space of data.spaces) {
     const grp = space.group;
+    const height = GROUP_HEIGHTS[grp] ?? GROUP_HEIGHTS.other;
     const shapes = geoToShapes(space.geometry);
     for (const shape of shapes) {
       const geom = new THREE.ExtrudeGeometry(shape, {
-        depth: EXTRUDE_HEIGHT,
+        depth: height,
         bevelEnabled: false,
       });
       if (!spacesByGroup.has(grp)) {
@@ -85,10 +117,11 @@ export function buildFloor(data: FloorData): BuiltFloor {
     const merged = mergeGeometries(geoms);
     if (merged) {
       const color = GROUP_COLORS[grp] ?? GROUP_COLORS.other;
+      const opacity = grp === "shop" ? 0.85 : 0.75;
       const mat = new THREE.MeshLambertMaterial({
         color,
         transparent: true,
-        opacity: 0.75,
+        opacity,
         side: THREE.DoubleSide,
       });
       const mesh = new THREE.Mesh(merged, mat);
@@ -98,16 +131,31 @@ export function buildFloor(data: FloorData): BuiltFloor {
       mesh.userData.group = grp;
       group.add(mesh);
       clickables.push(mesh);
+
+      // A2: Spaceのエッジライン
+      const edges = new THREE.EdgesGeometry(merged, 15);
+      const edgeMat = new THREE.LineBasicMaterial({
+        color: new THREE.Color(color).offsetHSL(0, 0, 0.2),
+        transparent: true,
+        opacity: 0.5,
+      });
+      const edgeLine = new THREE.LineSegments(edges, edgeMat);
+      edgeLine.position.y = baseY;
+      edgeLine.rotation.x = -Math.PI / 2;
+      edgeLine.userData.layer = "space-edge";
+      group.add(edgeLine);
+
       geoms.forEach((g) => g.dispose());
     }
   }
 
   // 個別Space（ホバー用。マージとは別にraycast用に薄い透明メッシュ）
   for (const space of data.spaces) {
+    const hitHeight = GROUP_HEIGHTS[space.group] ?? GROUP_HEIGHTS.other;
     const shapes = geoToShapes(space.geometry);
     for (const shape of shapes) {
       const geom = new THREE.ExtrudeGeometry(shape, {
-        depth: EXTRUDE_HEIGHT,
+        depth: hitHeight,
         bevelEnabled: false,
       });
       const mat = new THREE.MeshBasicMaterial({
@@ -167,7 +215,7 @@ export function buildFloor(data: FloorData): BuiltFloor {
         const len = Math.sqrt(dx * dx + dz * dz);
         if (len < 0.01) continue;
 
-        const wallGeom = new THREE.PlaneGeometry(len, EXTRUDE_HEIGHT);
+        const wallGeom = new THREE.BoxGeometry(len, EXTRUDE_HEIGHT, 0.15);
         const midX = (p1.x + p2.x) / 2;
         const midZ = (p1.z + p2.z) / 2;
         const angle = Math.atan2(dz, dx);
@@ -182,9 +230,9 @@ export function buildFloor(data: FloorData): BuiltFloor {
       const merged = mergeGeometries(wallGeoms);
       if (merged) {
         const mat = new THREE.MeshLambertMaterial({
-          color: 0x555577,
+          color: 0x667799,
           transparent: true,
-          opacity: 0.3,
+          opacity: 0.45,
           side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(merged, mat);
@@ -194,6 +242,85 @@ export function buildFloor(data: FloorData): BuiltFloor {
         wallGeoms.forEach((g) => g.dispose());
       }
     }
+  }
+
+  // B001（商業施設）のエリアラベル
+  const shopsByArea = new Map<string, { xs: number[]; zs: number[] }>();
+  for (const space of data.spaces) {
+    if (space.category !== "B001") continue;
+    const area = space.area || "";
+    if (!area) continue;
+    if (!shopsByArea.has(area)) shopsByArea.set(area, { xs: [], zs: [] });
+    const entry = shopsByArea.get(area)!;
+    const coords = space.geometry.coordinates[0] as number[][];
+    if (!coords || coords.length === 0) continue;
+    let cx = 0, cz = 0;
+    for (const [x, z] of coords) { cx += x; cz += z; }
+    cx /= coords.length;
+    cz /= coords.length;
+    entry.xs.push(cx);
+    entry.zs.push(cz);
+  }
+
+  for (const [area, { xs, zs }] of shopsByArea) {
+    if (xs.length === 0) continue;
+    const cx = xs.reduce((a, b) => a + b, 0) / xs.length;
+    const cz = zs.reduce((a, b) => a + b, 0) / zs.length;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "rgba(255, 136, 0, 0.7)";
+    ctx.fillRect(0, 0, 256, 64);
+    ctx.font = "bold 28px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(area, 128, 32);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+    const sprite = new THREE.Sprite(mat);
+    sprite.position.set(cx, baseY + 5, -cz);
+    sprite.scale.set(20, 5, 1);
+    sprite.userData.layer = "area-label";
+    group.add(sprite);
+  }
+
+  // 名前付きSpaceのラベル（改札名、ホーム名等）
+  for (const space of data.spaces) {
+    if (!space.name) continue;
+    if (space.category === "B029" || space.category === "B030") continue;
+
+    const coords = space.geometry.coordinates[0] as number[][];
+    if (!coords || coords.length === 0) continue;
+    let cx = 0, cz = 0;
+    for (const [x, z] of coords) { cx += x; cz += z; }
+    cx /= coords.length;
+    cz /= coords.length;
+
+    const height = GROUP_HEIGHTS[space.group] ?? 2.5;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 48;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "rgba(30, 50, 80, 0.75)";
+    ctx.fillRect(0, 0, 256, 48);
+    ctx.font = "bold 22px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#e0eaf5";
+    ctx.fillText(space.name.slice(0, 12), 128, 24);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+    const sprite = new THREE.Sprite(mat);
+    sprite.position.set(cx, baseY + height + 1, -cz);
+    sprite.scale.set(16, 4, 1);
+    sprite.userData.layer = "space-label";
+    group.add(sprite);
   }
 
   return { group, clickables };

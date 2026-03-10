@@ -7,6 +7,9 @@ const MARKER_COLOR_START = 0x44ff88;
 const MARKER_COLOR_END = 0xff4466;
 
 let routeGroup: THREE.Group | null = null;
+let animationId: number | null = null;
+let requestRenderFn: (() => void) | null = null;
+let viewToggleBtn: HTMLButtonElement | null = null;
 
 /**
  * 経路を3Dで描画
@@ -48,12 +51,63 @@ export function renderRoute(
   const line = new THREE.Line(lineGeom, lineMat);
   routeGroup.add(line);
 
+  // パルスマーカー（経路上を移動する光る球体）
+  const pulseGeom = new THREE.SphereGeometry(1.0, 8, 6);
+  const pulseMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.9,
+  });
+  const pulse = new THREE.Mesh(pulseGeom, pulseMat);
+  routeGroup.add(pulse);
+
   // スタート・ゴールマーカー
   addMarker(routeGroup, path[0], MARKER_COLOR_START, "S");
   addMarker(routeGroup, path[path.length - 1], MARKER_COLOR_END, "G");
 
   scene.add(routeGroup);
   requestRender();
+
+  // 視点切替ボタンを表示
+  if (!viewToggleBtn) {
+    viewToggleBtn = document.createElement("button");
+    viewToggleBtn.id = "view-toggle";
+    // インラインスタイル
+    Object.assign(viewToggleBtn.style, {
+      position: "absolute",
+      bottom: "50px",
+      right: "12px",
+      padding: "8px 16px",
+      fontSize: "14px",
+      fontWeight: "bold",
+      border: "1px solid rgba(80,140,220,0.4)",
+      borderRadius: "8px",
+      background: "rgba(10,30,55,0.9)",
+      color: "#e0eaf5",
+      cursor: "pointer",
+      backdropFilter: "blur(8px)",
+      zIndex: "20",
+      pointerEvents: "auto",
+      display: "none",
+    });
+    document.getElementById("ui")!.appendChild(viewToggleBtn);
+  }
+  viewToggleBtn.style.display = "block";
+  viewToggleBtn.textContent = "👁 目線";
+  viewToggleBtn.dataset.view = "firstperson";
+
+  // パルスアニメーション開始
+  requestRenderFn = requestRender;
+  let t = 0;
+  function animatePulse() {
+    t += 0.002; // ~8秒で1サイクル (1/500 * 60fps ≈ 8.3秒)
+    if (t > 1) t = 0;
+    const pos = curve.getPoint(t);
+    pulse.position.copy(pos);
+    if (requestRenderFn) requestRenderFn();
+    animationId = requestAnimationFrame(animatePulse);
+  }
+  animatePulse();
 }
 
 function addMarker(group: THREE.Group, node: NetNode, color: number, label: string) {
@@ -88,9 +142,27 @@ function addMarker(group: THREE.Group, node: NetNode, color: number, label: stri
 }
 
 /**
+ * 視点切替ボタンの参照を取得
+ */
+export function getViewToggleButton(): HTMLButtonElement | null {
+  return viewToggleBtn;
+}
+
+/**
  * 経路表示をクリア
  */
 export function clearRoute(scene: THREE.Scene) {
+  // アニメーション停止
+  if (animationId !== null) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+  requestRenderFn = null;
+
+  if (viewToggleBtn) {
+    viewToggleBtn.style.display = "none";
+  }
+
   if (routeGroup) {
     scene.remove(routeGroup);
     routeGroup.traverse((child) => {

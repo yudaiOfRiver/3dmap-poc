@@ -32,8 +32,8 @@ let nodes: NetNode[] = [];
 let links: NetLink[] = [];
 let adjacency: Map<number, { to: number; cost: number; linkIdx: number }[]> = new Map();
 
-export async function loadNetwork(): Promise<void> {
-  const res = await fetch("./data/network.json");
+export async function loadNetwork(path = "./data/network.json"): Promise<void> {
+  const res = await fetch(path);
   const data = await res.json();
 
   nodes = data.nodes.map((n: number[]) => ({
@@ -89,11 +89,69 @@ export function findNearestNode(x: number, y: number, z: number): NetNode | null
   return best;
 }
 
+export interface RouteOptions {
+  avoidStairs?: boolean;
+}
+
+export interface RouteStep {
+  floor: string;
+  type: "walk" | "stairs" | "escalator" | "elevator";
+  distance: number;
+}
+
+function routeTypeToStep(rt: number): RouteStep["type"] {
+  if (rt === 4) return "stairs";
+  if (rt === 5) return "escalator";
+  if (rt === 6) return "elevator";
+  return "walk";
+}
+
+/**
+ * 経路結果からフロア別ステップを生成
+ */
+export function buildRouteSteps(result: RouteResult): RouteStep[] {
+  const steps: RouteStep[] = [];
+  const path = result.path;
+  if (path.length < 2) return steps;
+
+  let currentFloor = path[0].floor;
+  let currentType: RouteStep["type"] = "walk";
+  let currentDist = 0;
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const neighbors = adjacency.get(path[i].id);
+    const edge = neighbors?.find((e) => e.to === path[i + 1].id);
+    const link = edge ? links[edge.linkIdx] : null;
+    const segType = link ? routeTypeToStep(link.routeType) : "walk";
+    const segDist = link ? link.distance : 0;
+
+    if (segType !== currentType || path[i + 1].floor !== currentFloor) {
+      // 現在のステップを確定
+      if (currentDist > 0 || currentType !== "walk") {
+        steps.push({ floor: currentFloor, type: currentType, distance: Math.round(currentDist) });
+      }
+      currentFloor = path[i + 1].floor;
+      currentType = segType;
+      currentDist = segDist;
+    } else {
+      currentDist += segDist;
+    }
+  }
+  // 最後のステップ
+  if (currentDist > 0 || currentType !== "walk") {
+    steps.push({ floor: currentFloor, type: currentType, distance: Math.round(currentDist) });
+  }
+
+  return steps;
+}
+
 /**
  * A*経路探索
  */
-export function findRoute(startId: number, endId: number): RouteResult | null {
+export function findRoute(startId: number, endId: number, options?: RouteOptions): RouteResult | null {
   if (!adjacency.has(startId) || !adjacency.has(endId)) return null;
+
+  const avoidStairs = options?.avoidStairs ?? false;
 
   const endNode = nodes.find((n) => n.id === endId);
   if (!endNode) return null;
@@ -159,6 +217,9 @@ export function findRoute(startId: number, endId: number): RouteResult | null {
 
     for (const edge of neighbors) {
       if (closed.has(edge.to)) continue;
+
+      // バリアフリーモード: 階段(routeType===4)をスキップ
+      if (avoidStairs && links[edge.linkIdx].routeType === 4) continue;
 
       const tentativeG = (gScore.get(current) ?? Infinity) + edge.cost;
       if (tentativeG < (gScore.get(edge.to) ?? Infinity)) {

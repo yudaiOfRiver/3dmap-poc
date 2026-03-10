@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>3D駅マップ - 新宿駅</title>
+  <title>3D駅マップ - 渋谷駅</title>
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div id="ui">
-    <div id="header">新宿駅 3Dマップ <a href="shibuya.html" style="color:#88bbff;font-size:12px;margin-left:8px;text-decoration:none">渋谷駅→</a></div>
+    <div id="header"><a href="index.html" style="color:#88bbff;font-size:12px;margin-right:8px;text-decoration:none">←新宿駅</a> 渋谷駅 3Dマップ</div>
 
     <!-- 検索 -->
     <div id="search-container">
-      <input type="text" id="search-input" placeholder="施設を検索（トイレ, 出口, エレベーター...）" autocomplete="off">
+      <input type="text" id="search-input" placeholder="施設を検索（トイレ, 出口, エスカレーター...）" autocomplete="off">
       <button id="search-clear" style="display:none">&times;</button>
       <div id="search-results"></div>
     </div>
@@ -26,12 +26,12 @@
         <span>凡例</span>
       </div>
       <div class="legend-items">
-        <div><span class="legend-color" style="background:#4488ff"></span>通路</div>
-        <div><span class="legend-color" style="background:#44cc88"></span>改札内</div>
-        <div><span class="legend-color" style="background:#ffaa44"></span>店舗</div>
-        <div><span class="legend-color" style="background:#ff6666"></span>階段・EV</div>
-        <div><span class="legend-color" style="background:#aa88ff"></span>ホーム</div>
-        <div><span class="legend-color" style="background:#888899"></span>フロア基盤</div>
+        <div><span class="legend-color" style="background:#8899aa"></span>壁</div>
+        <div><span class="legend-color" style="background:#556677"></span>床</div>
+        <div><span class="legend-color" style="background:#667788"></span>天井</div>
+        <div><span class="legend-color" style="background:#44aa88"></span>ドア</div>
+        <div><span class="legend-color" style="background:#88ccee"></span>窓</div>
+        <div><span class="legend-color" style="background:#aa8866"></span>設備</div>
       </div>
     </div>
 
@@ -67,6 +67,6 @@
     <div id="info-panel"></div>
     <div id="tooltip"></div>
   </div>
-  <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="/src/shibuya-main.ts"></script>
 </body>
 </html>

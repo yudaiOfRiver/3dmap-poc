@@ -189,6 +189,176 @@ body {
 .route-floors { color: #8899bb; font-size: 11px; }
 .route-error { color: #ff6666; }
 
+/* --- 経路ステップ表示 (B2) --- */
+.route-steps {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.route-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+}
+.step-floor {
+  background: rgba(68, 136, 255, 0.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 11px;
+  min-width: 32px;
+  text-align: center;
+}
+.route-step-connector {
+  padding-left: 12px;
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+}
+
+/* --- スワップボタン (B4) --- */
+.route-swap-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.route-swap-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+.route-options {
+  margin: 4px 0 6px;
+}
+.route-checkbox {
+  font-size: 12px;
+  color: #a0bcd8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.route-checkbox input {
+  accent-color: #44aaff;
+}
+
+/* --- 現在地特定パネル --- */
+#locate-panel {
+  position: absolute;
+  top: 85px;
+  right: 12px;
+  width: min(300px, 45vw);
+  background: rgba(10,30,55,0.92);
+  border: 1px solid rgba(80,140,220,0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  color: #e0eaf5;
+  overflow: hidden;
+  z-index: 10;
+}
+.locate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  user-select: none;
+}
+.locate-header:hover {
+  background: rgba(255,255,255,0.05);
+}
+.locate-arrow {
+  font-size: 10px;
+  color: #6688aa;
+}
+.locate-body {
+  padding: 0 12px 12px;
+}
+#locate-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid rgba(80,140,220,0.3);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.3);
+  color: #e0eaf5;
+  outline: none;
+  margin-bottom: 6px;
+}
+#locate-input:focus {
+  border-color: rgba(68,136,255,0.6);
+}
+#locate-search {
+  width: 100%;
+  padding: 6px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(68,136,255,0.3);
+  color: #e0eaf5;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+#locate-search:hover {
+  background: rgba(68,136,255,0.5);
+}
+.locate-no-result {
+  font-size: 12px;
+  color: #6688aa;
+  padding: 8px 0;
+  text-align: center;
+}
+.locate-candidate {
+  padding: 8px 10px;
+  border: 1px solid rgba(80,140,220,0.15);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.locate-candidate:hover {
+  background: rgba(68,136,255,0.15);
+}
+.locate-candidate.selected {
+  background: rgba(68,136,255,0.25);
+  border-color: rgba(68,136,255,0.5);
+}
+.locate-candidate-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.locate-area {
+  font-weight: bold;
+  font-size: 13px;
+}
+.locate-floor {
+  background: rgba(68,136,255,0.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.locate-score {
+  font-size: 11px;
+  color: #6688aa;
+  margin-left: auto;
+}
+.locate-candidate-pois {
+  font-size: 11px;
+  color: #a0bcd8;
+}
+
 /* --- 施設詳細パネル --- */
 #detail-panel {
   display: none;
@@ -263,6 +433,14 @@ body {
   #detail-panel { bottom: 44px; }
   .detail-title { font-size: 13px; }
   .detail-row { font-size: 12px; }
+
+  #locate-panel {
+    top: auto;
+    bottom: 140px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
 }
 
 /* ===== タブレット (641-1024px) ===== */

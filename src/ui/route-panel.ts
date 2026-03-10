@@ -1,9 +1,11 @@
 import type { POIEntry } from "../scene/poi-layer";
 import { search, type SearchableItem } from "../data/search";
+import type { RouteStep } from "../data/network";
 
 export interface RouteRequest {
   start: POIEntry;
   end: POIEntry;
+  barrierFree: boolean;
 }
 
 export type RouteRequestCallback = (req: RouteRequest) => void;
@@ -24,6 +26,7 @@ export function setupRoutePanel(
   const goBtn = panel.querySelector<HTMLButtonElement>("#route-go")!;
   const clearBtn = panel.querySelector<HTMLButtonElement>("#route-clear")!;
   const resultInfo = panel.querySelector<HTMLDivElement>("#route-result")!;
+  const barrierFreeCheck = panel.querySelector<HTMLInputElement>("#route-barrier-free");
 
   let selectedStart: POIEntry | null = null;
   let selectedEnd: POIEntry | null = null;
@@ -95,7 +98,11 @@ export function setupRoutePanel(
 
   goBtn.addEventListener("click", () => {
     if (selectedStart && selectedEnd) {
-      onRoute({ start: selectedStart, end: selectedEnd });
+      onRoute({
+        start: selectedStart,
+        end: selectedEnd,
+        barrierFree: barrierFreeCheck?.checked ?? false,
+      });
     }
   });
 
@@ -109,16 +116,58 @@ export function setupRoutePanel(
     onClear();
   });
 
+  // B4: スワップボタン
+  const swapBtn = panel.querySelector<HTMLButtonElement>("#route-swap");
+  if (swapBtn) {
+    swapBtn.addEventListener("click", () => {
+      // 入力値の入替
+      const tmpVal = startInput.value;
+      startInput.value = endInput.value;
+      endInput.value = tmpVal;
+
+      // 選択状態の入替
+      const tmpSelected = selectedStart;
+      selectedStart = selectedEnd;
+      selectedEnd = tmpSelected;
+
+      updateGoButton();
+    });
+  }
+
   updateGoButton();
 
+  function stepTypeLabel(type: RouteStep["type"]): string {
+    switch (type) {
+      case "stairs": return "階段";
+      case "escalator": return "エスカレーター";
+      case "elevator": return "エレベーター";
+      default: return "通路";
+    }
+  }
+
   return {
-    showResult(distance: number, floors: string[]) {
+    showResult(distance: number, floors: string[], steps?: RouteStep[]) {
       const minutes = Math.ceil(distance / 80); // 80m/min 歩行速度
-      resultInfo.innerHTML = `
+      let html = `
         <span class="route-distance">${distance}m</span>
         <span class="route-time">約${minutes}分</span>
         <span class="route-floors">${floors.join(" → ")}</span>
       `;
+
+      if (steps && steps.length > 0) {
+        html += '<div class="route-steps">';
+        for (let i = 0; i < steps.length; i++) {
+          const step = steps[i];
+          if (step.type === "walk") {
+            html += `<div class="route-step"><span class="step-floor">${step.floor}F</span> 通路 ${step.distance}m</div>`;
+          } else {
+            html += `<div class="route-step-connector">↓ ${stepTypeLabel(step.type)}</div>`;
+          }
+        }
+        html += '</div>';
+      }
+
+      resultInfo.innerHTML = html;
       resultInfo.style.display = "flex";
     },
     showError() {

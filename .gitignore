@@ -5,3 +5,4 @@ dist/
 data/raw/
 __pycache__/
 *.pyc
+.vercel
