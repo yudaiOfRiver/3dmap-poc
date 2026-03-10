@@ -408,7 +408,7 @@ async function main() {
   // --- ネットワークデータ読み込み + 経路検索UI ---
 
   try {
-    await loadNetwork("./data/network.json");
+    await loadNetwork("./data/shinjuku_plateau/network.json");
   } catch {
     console.warn("ネットワークデータが見つかりません（経路検索は無効）");
   }
