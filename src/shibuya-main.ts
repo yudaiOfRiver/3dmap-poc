@@ -282,24 +282,22 @@ async function main() {
 
   // 視点切替ボタン（経路探索不要で常時表示）
   let isWalkMode = false;
-  const viewBtn = document.createElement("button");
-  viewBtn.id = "view-mode-btn";
-  viewBtn.textContent = "👁 目線モード";
-  viewBtn.title = "一人称視点に切り替え";
-  document.getElementById("ui")!.appendChild(viewBtn);
-  viewBtn.addEventListener("click", () => {
-    if (isWalkMode) {
-      moveCameraToBirdEye(camera, controls, requestRender);
-      setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
-      viewBtn.textContent = "👁 目線モード";
-      isWalkMode = false;
-    } else {
-      moveCameraToWalkView(camera, controls, requestRender);
-      setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
-      viewBtn.textContent = "🦅 鳥瞰モード";
-      isWalkMode = true;
-    }
-  });
+  const viewBtn = document.getElementById("view-mode-btn") as HTMLButtonElement | null;
+  if (viewBtn) {
+    viewBtn.addEventListener("click", () => {
+      if (isWalkMode) {
+        moveCameraToBirdEye(camera, controls, requestRender);
+        setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
+        viewBtn.textContent = "👁 目線モード";
+        isWalkMode = false;
+      } else {
+        moveCameraToWalkView(camera, controls, requestRender);
+        setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+        viewBtn.textContent = "🦅 鳥瞰モード";
+        isWalkMode = true;
+      }
+    });
+  }
 
   // 検索インデックス構築
   interface SearchItem {
