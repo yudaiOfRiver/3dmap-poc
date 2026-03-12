@@ -13,6 +13,7 @@ import { createNavBar, type NavBarController } from "./ui/nav-bar";
 import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
 import Fuse from "fuse.js";
+import { renderBuildings } from "./scene/building-renderer";
 import "./style.css";
 
 interface ShibuyaSurface {
@@ -275,6 +276,9 @@ async function main() {
       }
     }
   } catch { /* テナントデータがなくても動作する */ }
+
+  // 周辺建物・道路を描画
+  renderBuildings(scene, requestRender).catch(() => {});
 
   // 検索インデックス構築
   interface SearchItem {
