@@ -14,6 +14,8 @@ import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
 import Fuse from "fuse.js";
 import { renderBuildings } from "./scene/building-renderer";
+import { createWalkEngine, type WalkController, type DirectionInfo } from "./ui/walk-engine";
+import { showWalkArrows, clearWalkArrows, handleArrowClick, handleArrowHover } from "./ui/walk-arrows";
 import "./style.css";
 
 interface ShibuyaSurface {
@@ -280,21 +282,76 @@ async function main() {
   // 周辺建物・道路を描画
   renderBuildings(scene, requestRender).catch(() => {});
 
-  // 視点切替ボタン（経路探索不要で常時表示）
+  // ウォークエンジン（分岐選択ナビ）
   let isWalkMode = false;
+  const walkRaycaster = new THREE.Raycaster();
+  const walkPointer = new THREE.Vector2();
+
+  const walkEngine = createWalkEngine(
+    camera, controls, requestRender,
+    false, // negateZ=false for Shibuya
+    (nodeId: number, directions: DirectionInfo[]) => {
+      // 分岐到着コールバック: 矢印を表示
+      const pos = camera.position.clone();
+      showWalkArrows(scene, pos, directions, requestRender);
+    },
+    (floor: string) => {
+      // フロア変更コールバック
+      const active = new Set([floor]);
+      onFloorChange(active);
+      document.querySelectorAll<HTMLButtonElement>(".floor-btn[data-floor-key]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.floorKey === floor);
+      });
+    },
+  );
+
+  // 矢印クリックイベント
+  const canvasEl = canvas;
+  canvasEl.addEventListener("click", (e: MouseEvent) => {
+    if (!isWalkMode) return;
+    const rect = canvasEl.getBoundingClientRect();
+    walkPointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    walkPointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    handleArrowClick(walkRaycaster, walkPointer, camera, scene);
+  });
+
+  // 矢印ホバーイベント
+  canvasEl.addEventListener("mousemove", (e: MouseEvent) => {
+    if (!isWalkMode) return;
+    const rect = canvasEl.getBoundingClientRect();
+    walkPointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    walkPointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    handleArrowHover(walkRaycaster, walkPointer, camera);
+  });
+
+  // 視点切替ボタン
   const viewBtn = document.getElementById("view-mode-btn") as HTMLButtonElement | null;
   if (viewBtn) {
     viewBtn.addEventListener("click", () => {
       if (isWalkMode) {
+        // ウォークモード終了
+        walkEngine.stop();
+        clearWalkArrows(scene);
         moveCameraToBirdEye(camera, controls, requestRender);
         setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
         viewBtn.textContent = "👁 目線モード";
         isWalkMode = false;
       } else {
-        moveCameraToWalkView(camera, controls, requestRender);
-        setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
-        viewBtn.textContent = "🦅 鳥瞰モード";
-        isWalkMode = true;
+        // ウォークモード開始: カメラのtarget位置に最も近いノードを探す
+        const t = controls.target;
+        const nearNode = findNearestNode(t.x, t.y, t.z);
+        if (nearNode) {
+          isWalkMode = true;
+          setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+          viewBtn.textContent = "🦅 鳥瞰モード";
+          // 対象フロアだけ表示
+          const active = new Set([nearNode.floor]);
+          onFloorChange(active);
+          document.querySelectorAll<HTMLButtonElement>(".floor-btn[data-floor-key]").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.floorKey === nearNode.floor);
+          });
+          walkEngine.start(nearNode.id);
+        }
       }
     });
   }

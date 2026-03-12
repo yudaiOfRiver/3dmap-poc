@@ -67,6 +67,18 @@ export function getNodes(): NetNode[] {
   return nodes;
 }
 
+export function getNodeById(id: number): NetNode | undefined {
+  return nodes[id];
+}
+
+export function getNeighbors(nodeId: number): { to: number; cost: number; linkIdx: number }[] {
+  return adjacency.get(nodeId) ?? [];
+}
+
+export function getLink(idx: number): NetLink {
+  return links[idx];
+}
+
 /**
  * 指定座標に最も近いノードを検索
  */
