@@ -26,7 +26,7 @@ CENTER_LON = 139.7010
 GEOID_HEIGHT = 36.7
 
 # 駅中心からの最大表示範囲 (m)
-MAX_DISTANCE = 500
+MAX_DISTANCE = 200
 
 # 対象メッシュコード
 TARGET_MESHES = [

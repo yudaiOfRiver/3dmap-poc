@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { setupScene } from "./scene/setup";
 import { setupFloorSelector } from "./ui/floor-selector";
-import { animateCameraTo, moveCameraToFirstPerson, moveCameraToBirdEye } from "./utils/camera-animation";
+import { animateCameraTo, moveCameraToFirstPerson, moveCameraToBirdEye, moveCameraToWalkView } from "./utils/camera-animation";
 import { loadNetwork, findNearestNode, findRoute, buildRouteSteps } from "./data/network";
 import { setupRoutePanel } from "./ui/route-panel";
 import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
@@ -279,6 +279,27 @@ async function main() {
 
   // 周辺建物・道路を描画
   renderBuildings(scene, requestRender).catch(() => {});
+
+  // 視点切替ボタン（経路探索不要で常時表示）
+  let isWalkMode = false;
+  const viewBtn = document.createElement("button");
+  viewBtn.id = "view-mode-btn";
+  viewBtn.textContent = "👁 目線モード";
+  viewBtn.title = "一人称視点に切り替え";
+  document.getElementById("ui")!.appendChild(viewBtn);
+  viewBtn.addEventListener("click", () => {
+    if (isWalkMode) {
+      moveCameraToBirdEye(camera, controls, requestRender);
+      setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
+      viewBtn.textContent = "👁 目線モード";
+      isWalkMode = false;
+    } else {
+      moveCameraToWalkView(camera, controls, requestRender);
+      setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+      viewBtn.textContent = "🦅 鳥瞰モード";
+      isWalkMode = true;
+    }
+  });
 
   // 検索インデックス構築
   interface SearchItem {

@@ -91,6 +91,48 @@ export function moveCameraToBirdEye(
 }
 
 /**
+ * 現在のカメラ向きを維持したまま目線高さに降ろす（経路不要の一人称モード）
+ */
+export function moveCameraToWalkView(
+  camera: THREE.PerspectiveCamera,
+  controls: OrbitControls,
+  requestRender: () => void,
+  groundY = -5,
+): void {
+  const eyeHeight = 1.6;
+  // 現在のカメラの向き（XZ平面上の方向）を維持
+  const dir = new THREE.Vector3();
+  camera.getWorldDirection(dir);
+  dir.y = 0;
+  dir.normalize();
+
+  // 現在のtargetのXZ位置を足元として使う
+  const footX = controls.target.x;
+  const footZ = controls.target.z;
+  const startPos = new THREE.Vector3(footX, groundY + eyeHeight, footZ);
+  const target = new THREE.Vector3().copy(startPos).addScaledVector(dir, 8);
+
+  const duration = 800;
+  const startTime = performance.now();
+  const fromPos = camera.position.clone();
+  const fromTarget = controls.target.clone();
+
+  function animate() {
+    const elapsed = performance.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    camera.position.lerpVectors(fromPos, startPos, ease);
+    controls.target.lerpVectors(fromTarget, target, ease);
+    controls.update();
+    requestRender();
+
+    if (t < 1) requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/**
  * カメラをターゲット位置にスムーズ移動
  */
 export function animateCameraTo(

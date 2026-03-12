@@ -527,6 +527,27 @@ body {
   border-radius: 0 0 12px 12px;
 }
 
+/* --- 視点切替ボタン --- */
+#view-mode-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(10, 30, 55, 0.9);
+  color: #e0eaf5;
+  border: 1px solid rgba(80, 140, 220, 0.4);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  z-index: 30;
+  transition: background 0.2s;
+}
+#view-mode-btn:hover {
+  background: rgba(30, 60, 100, 0.95);
+}
+
 /* ===== タブレット (641-1024px) ===== */
 @media (min-width: 641px) and (max-width: 1024px) {
   #floor-panel {
