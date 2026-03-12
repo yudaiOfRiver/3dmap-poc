@@ -383,9 +383,11 @@ async function main() {
     searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim();
       searchClear.style.display = q ? "block" : "none";
-      if (!q) { searchResults.innerHTML = ""; return; }
+      if (!q) { searchResults.innerHTML = ""; searchResults.style.display = "none"; return; }
       const results = fuse.search(q, { limit: 10 });
       searchResults.innerHTML = "";
+      if (results.length === 0) { searchResults.style.display = "none"; return; }
+      searchResults.style.display = "block";
       for (const r of results) {
         const div = document.createElement("div");
         div.className = "search-result-item";
@@ -412,6 +414,7 @@ async function main() {
     searchClear.addEventListener("click", () => {
       searchInput.value = "";
       searchResults.innerHTML = "";
+      searchResults.style.display = "none";
       searchClear.style.display = "none";
     });
   }
