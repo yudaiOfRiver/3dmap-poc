@@ -367,11 +367,12 @@ async function main() {
 
   const routeUI = setupRoutePanel(
     (req) => {
+      try {
       const startNode = findNearestNode(
-        req.start.worldPos.x, req.start.worldPos.y, -req.start.worldPos.z,
+        req.start.worldPos.x, req.start.worldPos.y, req.start.worldPos.z,
       );
       const endNode = findNearestNode(
-        req.end.worldPos.x, req.end.worldPos.y, -req.end.worldPos.z,
+        req.end.worldPos.x, req.end.worldPos.y, req.end.worldPos.z,
       );
       if (!startNode || !endNode) { routeUI.showError(); return; }
       const result = findRoute(startNode.id, endNode.id, { avoidStairs: req.barrierFree });
@@ -385,19 +386,19 @@ async function main() {
       document.querySelectorAll<HTMLButtonElement>(".floor-btn:not([data-floor-key])").forEach(btn => {
         btn.classList.remove("active");
       });
-      renderRoute(scene, result, requestRender);
+      renderRoute(scene, result, requestRender, false);
       const steps = buildRouteSteps(result);
       routeUI.showResult(result.totalDistance, routeFloors, steps);
       // ナビバー作成
       if (navBar) navBar.destroy();
       navBar = createNavBar(steps, result.path, renderedTenants, (stepIdx, startNode, nextNode) => {
-        moveCameraToFirstPerson(startNode, nextNode, camera, controls, requestRender);
+        moveCameraToFirstPerson(startNode, nextNode, camera, controls, requestRender, false);
       });
       // 一人称視点
       const startPath = result.path[0];
       const nextPath = result.path[Math.min(3, result.path.length - 1)];
       let isFirstPerson = true;
-      moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+      moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender, false);
       setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
       if (navBar) navBar.show();
       const toggleBtn = getViewToggleButton();
@@ -411,13 +412,17 @@ async function main() {
             toggleBtn.textContent = "👁 目線";
             isFirstPerson = false;
           } else {
-            moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+            moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender, false);
             setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
             if (navBar) navBar.show();
             toggleBtn.textContent = "🦅 鳥瞰";
             isFirstPerson = true;
           }
         };
+      }
+      } catch (e) {
+        console.error("経路検索エラー:", e);
+        routeUI.showError();
       }
     },
     () => {

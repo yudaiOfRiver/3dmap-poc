@@ -39,6 +39,11 @@ export function createNavBar(
   tenants: RenderedTenant[],
   onStepChange: (stepIdx: number, startNode: NetNode, nextNode: NetNode) => void,
 ): NavBarController {
+  if (steps.length === 0) {
+    // 空のコントローラを返す
+    return { show() {}, hide() {}, destroy() {}, goToStep() {} };
+  }
+
   let currentStep = 0;
 
   // ステップごとの近傍テナントを事前計算

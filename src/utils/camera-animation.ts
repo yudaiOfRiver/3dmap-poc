@@ -15,13 +15,14 @@ export function moveCameraToFirstPerson(
   camera: THREE.PerspectiveCamera,
   controls: OrbitControls,
   requestRender: () => void,
+  negateZ = true,
 ): void {
   // 目線高さ: ノードのY + 1.6m（人の目線）
   const eyeHeight = 1.6;
-  const startPos = new THREE.Vector3(startNode.x, startNode.y + eyeHeight, -startNode.z);
+  const startPos = new THREE.Vector3(startNode.x, startNode.y + eyeHeight, negateZ ? -startNode.z : startNode.z);
 
   // 視線方向: 次のノードの方を向く
-  const lookAt = new THREE.Vector3(nextNode.x, nextNode.y + eyeHeight, -nextNode.z);
+  const lookAt = new THREE.Vector3(nextNode.x, nextNode.y + eyeHeight, negateZ ? -nextNode.z : nextNode.z);
 
   // 視線方向に少し離れた位置をtargetにする（8m先を見る）
   const dir = new THREE.Vector3().subVectors(lookAt, startPos).normalize();

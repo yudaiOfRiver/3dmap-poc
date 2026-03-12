@@ -18,6 +18,7 @@ export function renderRoute(
   scene: THREE.Scene,
   route: RouteResult,
   requestRender: () => void,
+  negateZ = true,
 ): void {
   clearRoute(scene);
 
@@ -28,7 +29,7 @@ export function renderRoute(
   if (path.length < 2) return;
 
   // ルートライン（TubeGeometryでパスを太く見せる）
-  const points = path.map((n) => new THREE.Vector3(n.x, n.y + 2, -n.z));
+  const points = path.map((n) => new THREE.Vector3(n.x, n.y + 2, negateZ ? -n.z : n.z));
   const curve = new THREE.CatmullRomCurve3(points, false);
 
   const tubeGeom = new THREE.TubeGeometry(curve, path.length * 4, 0.6, 6, false);
@@ -41,7 +42,7 @@ export function renderRoute(
   routeGroup.add(tube);
 
   // 点線の進行方向アニメーション用ラインも追加
-  const linePoints = path.map((n) => new THREE.Vector3(n.x, n.y + 2.5, -n.z));
+  const linePoints = path.map((n) => new THREE.Vector3(n.x, n.y + 2.5, negateZ ? -n.z : n.z));
   const lineGeom = new THREE.BufferGeometry().setFromPoints(linePoints);
   const lineMat = new THREE.LineBasicMaterial({
     color: 0xffffff,
@@ -62,8 +63,8 @@ export function renderRoute(
   routeGroup.add(pulse);
 
   // スタート・ゴールマーカー
-  addMarker(routeGroup, path[0], MARKER_COLOR_START, "S");
-  addMarker(routeGroup, path[path.length - 1], MARKER_COLOR_END, "G");
+  addMarker(routeGroup, path[0], MARKER_COLOR_START, "S", negateZ);
+  addMarker(routeGroup, path[path.length - 1], MARKER_COLOR_END, "G", negateZ);
 
   scene.add(routeGroup);
   requestRender();
@@ -110,12 +111,12 @@ export function renderRoute(
   animatePulse();
 }
 
-function addMarker(group: THREE.Group, node: NetNode, color: number, label: string) {
+function addMarker(group: THREE.Group, node: NetNode, color: number, label: string, negateZ: boolean) {
   // 球体マーカー
   const sphereGeom = new THREE.SphereGeometry(1.5, 12, 8);
   const sphereMat = new THREE.MeshBasicMaterial({ color });
   const sphere = new THREE.Mesh(sphereGeom, sphereMat);
-  sphere.position.set(node.x, node.y + 3, -node.z);
+  sphere.position.set(node.x, node.y + 3, negateZ ? -node.z : node.z);
   group.add(sphere);
 
   // ラベルSprite
@@ -136,7 +137,7 @@ function addMarker(group: THREE.Group, node: NetNode, color: number, label: stri
   const texture = new THREE.CanvasTexture(canvas);
   const spriteMat = new THREE.SpriteMaterial({ map: texture, depthWrite: false });
   const sprite = new THREE.Sprite(spriteMat);
-  sprite.position.set(node.x, node.y + 7, -node.z);
+  sprite.position.set(node.x, node.y + 7, negateZ ? -node.z : node.z);
   sprite.scale.set(5, 5, 1);
   group.add(sprite);
 }
