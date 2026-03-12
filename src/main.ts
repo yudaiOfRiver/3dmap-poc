@@ -9,8 +9,9 @@ import { loadNetwork, findNearestNode, findRoute, buildRouteSteps } from "./data
 import { setupRoutePanel } from "./ui/route-panel";
 import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
 import { setupLocatePanel } from "./ui/locate-panel";
-import { renderTenants, TYPE_COLORS } from "./scene/tenant-renderer";
+import { renderTenants, TYPE_COLORS, setTenantFirstPersonMode } from "./scene/tenant-renderer";
 import type { TenantStore, RenderedTenant } from "./scene/tenant-renderer";
+import { createNavBar, type NavBarController } from "./ui/nav-bar";
 import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
 import "./style.css";
@@ -347,6 +348,8 @@ async function main() {
     console.warn("ネットワークデータが見つかりません（経路検索は無効）");
   }
 
+  let navBar: NavBarController | null = null;
+
   const routeUI = setupRoutePanel(
     (req) => {
       const startNode = findNearestNode(
@@ -387,11 +390,19 @@ async function main() {
       const steps = buildRouteSteps(result);
       routeUI.showResult(result.totalDistance, routeFloors, steps);
 
+      // ナビバー作成
+      if (navBar) navBar.destroy();
+      navBar = createNavBar(steps, result.path, renderedTenants, (stepIdx, startNode, nextNode) => {
+        moveCameraToFirstPerson(startNode, nextNode, camera, controls, requestRender);
+      });
+
       // 出発点の一人称視点に移動
       const startPath = result.path[0];
       const nextPath = result.path[Math.min(3, result.path.length - 1)];
       let isFirstPerson = true;
       moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+      setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+      if (navBar) navBar.show();
 
       // 視点切替ボタンのハンドラ
       const toggleBtn = getViewToggleButton();
@@ -400,10 +411,14 @@ async function main() {
         toggleBtn.onclick = () => {
           if (isFirstPerson) {
             moveCameraToBirdEye(camera, controls, requestRender);
+            setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
+            if (navBar) navBar.hide();
             toggleBtn.textContent = "👁 目線";
             isFirstPerson = false;
           } else {
             moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+            setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+            if (navBar) navBar.show();
             toggleBtn.textContent = "🦅 鳥瞰";
             isFirstPerson = true;
           }
@@ -412,6 +427,8 @@ async function main() {
     },
     () => {
       clearRoute(scene);
+      setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
+      if (navBar) { navBar.destroy(); navBar = null; }
       requestRender();
     },
   );

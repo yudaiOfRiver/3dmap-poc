@@ -428,3 +428,114 @@ export function renderTenants(
 
   return result;
 }
+
+// --- 一人称モード用の表示制御 ---
+
+// 元のスプライト状態を保存
+interface OriginalSpriteState {
+  scaleX: number;
+  scaleY: number;
+  posY: number;
+  lineEndY: number;
+}
+
+const originalStates = new Map<THREE.Sprite, OriginalSpriteState>();
+let firstPersonAnimId: number | null = null;
+
+/**
+ * 一人称モードのテナント表示を切り替える
+ */
+export function setTenantFirstPersonMode(
+  renderedTenants: RenderedTenant[],
+  camera: THREE.Camera,
+  enabled: boolean,
+  requestRender: () => void,
+): void {
+  if (enabled) {
+    // 元の状態を保存 & 看板風に変更
+    for (const rt of renderedTenants) {
+      if (!originalStates.has(rt.sprite)) {
+        originalStates.set(rt.sprite, {
+          scaleX: rt.sprite.scale.x,
+          scaleY: rt.sprite.scale.y,
+          posY: rt.sprite.position.y,
+          lineEndY: 0, // 接続線の上端Y
+        });
+      }
+
+      // スプライトを縮小（看板サイズ: 約1/3）
+      rt.sprite.scale.set(5.5, 1.5, 1);
+
+      // ラベル位置を低く（目線付近 2.2m上）
+      const floorY = rt.worldPos.y - 3.5; // 元のlabelHeight分を引く
+      rt.sprite.position.y = floorY + 2.2;
+
+      // オーバーレイメッシュの透明度を下げる
+      rt.group.children.forEach(child => {
+        if (child instanceof THREE.Mesh && child.userData.layer === "tenant-overlay") {
+          const mat = child.material as THREE.MeshBasicMaterial;
+          mat.opacity = 0.25;
+        }
+        // 接続線を非表示（看板が低くなるので不要）
+        if (child instanceof THREE.Line) {
+          child.visible = false;
+        }
+      });
+    }
+
+    // 距離ベースの表示更新ループ開始
+    const updateVisibility = () => {
+      const camPos = camera.position;
+      const maxDist = 20; // 20m以内のみ表示
+      const fadeDist = 15; // 15m以降フェード開始
+
+      for (const rt of renderedTenants) {
+        const dist = camPos.distanceTo(rt.sprite.position);
+        if (dist > maxDist) {
+          rt.sprite.visible = false;
+        } else {
+          rt.sprite.visible = true;
+          // フェード効果
+          if (dist > fadeDist) {
+            const alpha = 1 - (dist - fadeDist) / (maxDist - fadeDist);
+            (rt.sprite.material as THREE.SpriteMaterial).opacity = alpha;
+          } else {
+            (rt.sprite.material as THREE.SpriteMaterial).opacity = 1;
+          }
+        }
+      }
+      requestRender();
+      firstPersonAnimId = requestAnimationFrame(updateVisibility);
+    };
+    firstPersonAnimId = requestAnimationFrame(updateVisibility);
+  } else {
+    // 鳥瞰に戻す: 元の状態を復元
+    if (firstPersonAnimId !== null) {
+      cancelAnimationFrame(firstPersonAnimId);
+      firstPersonAnimId = null;
+    }
+
+    for (const rt of renderedTenants) {
+      const orig = originalStates.get(rt.sprite);
+      if (orig) {
+        rt.sprite.scale.set(orig.scaleX, orig.scaleY, 1);
+        rt.sprite.position.y = orig.posY;
+        rt.sprite.visible = true;
+        (rt.sprite.material as THREE.SpriteMaterial).opacity = 1;
+      }
+
+      // オーバーレイとラインを復元
+      rt.group.children.forEach(child => {
+        if (child instanceof THREE.Mesh && child.userData.layer === "tenant-overlay") {
+          const mat = child.material as THREE.MeshBasicMaterial;
+          mat.opacity = 0.55;
+        }
+        if (child instanceof THREE.Line) {
+          child.visible = true;
+        }
+      });
+    }
+    originalStates.clear();
+    requestRender();
+  }
+}

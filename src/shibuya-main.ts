@@ -7,8 +7,9 @@ import { setupRoutePanel } from "./ui/route-panel";
 import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
 import { buildSearchIndex } from "./data/search";
 import { setupLocatePanel } from "./ui/locate-panel";
-import { renderTenants } from "./scene/tenant-renderer";
+import { renderTenants, setTenantFirstPersonMode } from "./scene/tenant-renderer";
 import type { TenantStore, RenderedTenant } from "./scene/tenant-renderer";
+import { createNavBar, type NavBarController } from "./ui/nav-bar";
 import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
 import Fuse from "fuse.js";
@@ -362,6 +363,8 @@ async function main() {
     console.warn("渋谷ネットワークデータが見つかりません（経路検索は無効）");
   }
 
+  let navBar: NavBarController | null = null;
+
   const routeUI = setupRoutePanel(
     (req) => {
       const startNode = findNearestNode(
@@ -385,28 +388,44 @@ async function main() {
       renderRoute(scene, result, requestRender);
       const steps = buildRouteSteps(result);
       routeUI.showResult(result.totalDistance, routeFloors, steps);
+      // ナビバー作成
+      if (navBar) navBar.destroy();
+      navBar = createNavBar(steps, result.path, renderedTenants, (stepIdx, startNode, nextNode) => {
+        moveCameraToFirstPerson(startNode, nextNode, camera, controls, requestRender);
+      });
       // 一人称視点
       const startPath = result.path[0];
       const nextPath = result.path[Math.min(3, result.path.length - 1)];
       let isFirstPerson = true;
       moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+      setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+      if (navBar) navBar.show();
       const toggleBtn = getViewToggleButton();
       if (toggleBtn) {
         toggleBtn.textContent = "🦅 鳥瞰";
         toggleBtn.onclick = () => {
           if (isFirstPerson) {
             moveCameraToBirdEye(camera, controls, requestRender);
+            setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
+            if (navBar) navBar.hide();
             toggleBtn.textContent = "👁 目線";
             isFirstPerson = false;
           } else {
             moveCameraToFirstPerson(startPath, nextPath, camera, controls, requestRender);
+            setTenantFirstPersonMode(renderedTenants, camera, true, requestRender);
+            if (navBar) navBar.show();
             toggleBtn.textContent = "🦅 鳥瞰";
             isFirstPerson = true;
           }
         };
       }
     },
-    () => { clearRoute(scene); requestRender(); },
+    () => {
+      clearRoute(scene);
+      setTenantFirstPersonMode(renderedTenants, camera, false, requestRender);
+      if (navBar) { navBar.destroy(); navBar = null; }
+      requestRender();
+    },
   );
 
   // 現在地特定パネル

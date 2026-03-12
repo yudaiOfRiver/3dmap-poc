@@ -97,6 +97,8 @@ export interface RouteStep {
   floor: string;
   type: "walk" | "stairs" | "escalator" | "elevator";
   distance: number;
+  pathStartIdx: number;
+  pathEndIdx: number;
 }
 
 function routeTypeToStep(rt: number): RouteStep["type"] {
@@ -117,6 +119,7 @@ export function buildRouteSteps(result: RouteResult): RouteStep[] {
   let currentFloor = path[0].floor;
   let currentType: RouteStep["type"] = "walk";
   let currentDist = 0;
+  let stepStartIdx = 0;
 
   for (let i = 0; i < path.length - 1; i++) {
     const neighbors = adjacency.get(path[i].id);
@@ -126,10 +129,10 @@ export function buildRouteSteps(result: RouteResult): RouteStep[] {
     const segDist = link ? link.distance : 0;
 
     if (segType !== currentType || path[i + 1].floor !== currentFloor) {
-      // 現在のステップを確定
       if (currentDist > 0 || currentType !== "walk") {
-        steps.push({ floor: currentFloor, type: currentType, distance: Math.round(currentDist) });
+        steps.push({ floor: currentFloor, type: currentType, distance: Math.round(currentDist), pathStartIdx: stepStartIdx, pathEndIdx: i });
       }
+      stepStartIdx = i;
       currentFloor = path[i + 1].floor;
       currentType = segType;
       currentDist = segDist;
@@ -137,9 +140,8 @@ export function buildRouteSteps(result: RouteResult): RouteStep[] {
       currentDist += segDist;
     }
   }
-  // 最後のステップ
   if (currentDist > 0 || currentType !== "walk") {
-    steps.push({ floor: currentFloor, type: currentType, distance: Math.round(currentDist) });
+    steps.push({ floor: currentFloor, type: currentType, distance: Math.round(currentDist), pathStartIdx: stepStartIdx, pathEndIdx: path.length - 1 });
   }
 
   return steps;

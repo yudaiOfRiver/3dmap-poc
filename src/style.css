@@ -441,6 +441,90 @@ body {
     left: 8px;
     width: auto;
   }
+
+  #nav-bar {
+    bottom: 44px;
+    width: calc(100vw - 16px);
+    border-radius: 10px;
+  }
+  .nav-instruction {
+    font-size: 13px;
+  }
+}
+
+/* --- ナビバー --- */
+#nav-bar {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 85vw);
+  background: rgba(10, 30, 55, 0.94);
+  border: 1px solid rgba(80, 140, 220, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  z-index: 25;
+  overflow: hidden;
+}
+.nav-bar-main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+}
+.nav-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(80, 140, 220, 0.3);
+  border-radius: 8px;
+  background: rgba(40, 80, 140, 0.3);
+  color: #c0d8f0;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.nav-btn:hover:not(:disabled) {
+  background: rgba(60, 120, 200, 0.4);
+}
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.nav-content {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.nav-instruction {
+  font-size: 15px;
+  font-weight: bold;
+  color: #e0eaf5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-landmarks {
+  font-size: 11px;
+  color: #8899bb;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-progress {
+  height: 3px;
+  background: rgba(80, 140, 220, 0.15);
+}
+.nav-progress-bar {
+  height: 100%;
+  background: #00ffaa;
+  transition: width 0.3s ease;
+  border-radius: 0 0 12px 12px;
 }
 
 /* ===== タブレット (641-1024px) ===== */
