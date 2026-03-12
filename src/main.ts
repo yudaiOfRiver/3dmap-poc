@@ -9,6 +9,8 @@ import { loadNetwork, findNearestNode, findRoute, buildRouteSteps } from "./data
 import { setupRoutePanel } from "./ui/route-panel";
 import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
 import { setupLocatePanel } from "./ui/locate-panel";
+import { renderTenants, TYPE_COLORS } from "./scene/tenant-renderer";
+import type { TenantStore, RenderedTenant } from "./scene/tenant-renderer";
 import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
 import "./style.css";
@@ -64,23 +66,6 @@ function hashCode(s: string): number {
   return h;
 }
 
-// --- テナントタイプ → 色 ---
-
-const TYPE_COLORS: Record<string, string> = {
-  convenience: "#44cc44",
-  cafe: "#cc8844",
-  restaurant: "#cc4444",
-  fastfood: "#ff6644",
-  drugstore: "#44aacc",
-  fashion: "#cc44aa",
-  goods: "#aaaa44",
-  book: "#8888cc",
-  beauty: "#cc88cc",
-  service: "#6688aa",
-  food: "#ff8844",
-  other: "#888888",
-};
-
 // --- テナントフロアキー正規化 ---
 
 const AREA_MAP: Record<string, string> = {
@@ -99,23 +84,6 @@ const AREA_MAP: Record<string, string> = {
 function normalizeFloorKey(key: string, area: string): string {
   if (area === "サブナード") return "B2";
   return key.replace(/F$/, "");
-}
-
-// --- テナントデータ型 ---
-
-interface TenantStore {
-  name: string;
-  area: string;
-  floorKey: string;
-  type: string;
-  icon: string;
-}
-
-interface PlacedTenantPOI {
-  store: TenantStore;
-  floorKey: string;
-  worldPos: THREE.Vector3;
-  sprite: THREE.Sprite;
 }
 
 const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -279,76 +247,42 @@ async function main() {
     if (floorGroup) floorGroup.add(poiGroup);
   }
 
-  // --- テナント情報読み込み & floor surface centroidベースで配置 ---
+  // --- テナント情報読み込み & モダン表示 ---
 
-  const tenantPOIs: PlacedTenantPOI[] = [];
+  let renderedTenants: RenderedTenant[] = [];
   try {
     const tenantRes = await fetch("./data/tenants.json");
     if (tenantRes.ok) {
       const tenantData = await tenantRes.json();
       const stores: TenantStore[] = tenantData.stores || [];
 
-      for (const store of stores) {
-        const floorKey = normalizeFloorKey(store.floorKey, store.area);
-        const floorGroup = floorGroups.get(floorKey);
-        if (!floorGroup) continue;
+      const tenantFloorEntries = floorEntries.map(e => ({
+        key: e.info.key,
+        surfaces: e.data.surfaces,
+        y: e.data.y,
+      }));
 
-        // フロアデータからfloorサーフェスのcentroidを取得
-        const floorData = floorEntries.find(e => e.info.key === floorKey);
-        if (!floorData) continue;
-        const floorSurfaces = floorData.data.surfaces.filter(s => s.type === "floor" && s.centroid);
-        if (floorSurfaces.length === 0) continue;
+      renderedTenants = renderTenants(stores, tenantFloorEntries, floorGroups, {
+        hashFn: hashCode,
+        normalizeFloorKey,
+        areaMap: AREA_MAP,
+      });
 
-        // ハッシュベースでfloorサーフェスの重心に配置
-        const idx = Math.abs(hashCode(store.name)) % floorSurfaces.length;
-        const centroid = floorSurfaces[idx].centroid!;
-
-        const tenantCanvas = document.createElement("canvas");
-        tenantCanvas.width = 256;
-        tenantCanvas.height = 80;
-        const ctx = tenantCanvas.getContext("2d")!;
-        ctx.fillStyle = TYPE_COLORS[store.type] ?? "#888888";
-        ctx.globalAlpha = 0.85;
-        ctx.fillRect(0, 0, 256, 80);
-        ctx.globalAlpha = 1;
-        ctx.font = "32px sans-serif";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "#fff";
-        ctx.fillText(store.icon, 8, 40);
-        ctx.font = "bold 22px sans-serif";
-        const name = store.name.length > 10 ? store.name.slice(0, 10) + "…" : store.name;
-        ctx.fillText(name, 48, 40);
-
-        const texture = new THREE.CanvasTexture(tenantCanvas);
-        const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, sizeAttenuation: true });
-        const sprite = new THREE.Sprite(mat);
-        const worldPos = new THREE.Vector3(centroid[0], centroid[1] + 2, centroid[2]);
-        sprite.position.copy(worldPos);
-        sprite.scale.set(14, 4.5, 1);
-        floorGroup.add(sprite);
-
-        const dataArea = AREA_MAP[store.area] ?? store.area;
-        const poiEntry: POIEntry = {
-          sprite,
+      // POIエントリに変換して検索対象に追加
+      for (const rt of renderedTenants) {
+        const dataArea = AREA_MAP[rt.store.area] ?? rt.store.area;
+        allPOIs.push({
+          sprite: rt.sprite,
           facility: {
-            geometry: { type: "Point", coordinates: [worldPos.x, -worldPos.z] },
+            geometry: { type: "Point", coordinates: [rt.worldPos.x, -rt.worldPos.z] },
             category: "TENANT",
             area: dataArea,
-            name: store.name,
+            name: rt.store.name,
           },
-          floorKey,
-          worldPos,
-          label: `${dataArea} - ${store.name}`,
-          categoryLabel: store.type,
-        };
-        allPOIs.push(poiEntry);
-
-        tenantPOIs.push({
-          store,
-          floorKey,
-          worldPos,
-          sprite,
+          floorKey: rt.floorKey,
+          worldPos: rt.worldPos,
+          label: `${dataArea} - ${rt.store.name}`,
+          categoryLabel: rt.store.type,
         });
       }
     }
@@ -571,7 +505,7 @@ async function main() {
       }
     }
 
-    // メッシュhit（サーフェスタイプ名を表示）
+    // メッシュhit（テナントオーバーレイ優先 → サーフェスタイプ名）
     const meshes: THREE.Mesh[] = [];
     for (const [, group] of floorGroups) {
       if (!group.visible) continue;
@@ -582,7 +516,13 @@ async function main() {
 
     const intersects = raycaster.intersectObjects(meshes);
     if (intersects.length > 0) {
-      const layer = intersects[0].object.userData.layer;
+      const obj = intersects[0].object;
+      if (obj.userData.layer === "tenant-overlay" && obj.userData.tenantName) {
+        const area = obj.userData.tenantArea ? `${obj.userData.tenantArea} - ` : "";
+        showTooltip(`${area}${obj.userData.tenantName}`, clientX, clientY);
+        return;
+      }
+      const layer = obj.userData.layer;
       showTooltip(typeNames[layer] || layer, clientX, clientY);
       return;
     }

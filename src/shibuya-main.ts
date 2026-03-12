@@ -7,6 +7,8 @@ import { setupRoutePanel } from "./ui/route-panel";
 import { renderRoute, clearRoute, getViewToggleButton } from "./scene/route-renderer";
 import { buildSearchIndex } from "./data/search";
 import { setupLocatePanel } from "./ui/locate-panel";
+import { renderTenants } from "./scene/tenant-renderer";
+import type { TenantStore, RenderedTenant } from "./scene/tenant-renderer";
 import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
 import Fuse from "fuse.js";
@@ -229,74 +231,46 @@ async function main() {
     if (floorGroup) floorGroup.add(poiGroup);
   }
 
-  // テナント情報読み込み
-  interface ShibuyaTenant {
-    name: string;
-    area: string;
-    floorKey: string;
-    type: string;
-    icon: string;
-  }
-  const tenantPOIs: ShibuyaPOI[] = [];
+  // テナント情報読み込み & モダン表示
+  let renderedTenants: RenderedTenant[] = [];
   try {
     const tenantRes = await fetch("./data/shibuya_tenants.json");
     if (tenantRes.ok) {
       const tenantData = await tenantRes.json();
-      const stores: ShibuyaTenant[] = tenantData.stores || [];
-      for (const store of stores) {
-        const floorGroup = floorGroups.get(store.floorKey);
-        if (!floorGroup) continue;
+      const stores: TenantStore[] = tenantData.stores || [];
 
-        // フロアデータから適切なfloor surface centroidを探してランダム配置
-        const floorData = floorEntries.find(e => e.info.key === store.floorKey);
-        if (!floorData) continue;
-        const floorSurfaces = floorData.data.surfaces.filter(s => s.type === "floor" && s.centroid);
-        if (floorSurfaces.length === 0) continue;
+      const tenantFloorEntries = floorEntries.map(e => ({
+        key: e.info.key,
+        surfaces: e.data.surfaces,
+        y: e.data.y,
+      }));
 
-        // ランダムなfloorサーフェスの重心に配置
-        const idx = Math.abs(hashCode(store.name)) % floorSurfaces.length;
-        const centroid = floorSurfaces[idx].centroid!;
+      // 渋谷駅エリア→空間ゾーンマッピング
+      const SHIBUYA_AREA_ZONES: Record<string, import("./scene/tenant-renderer").AreaZone> = {
+        "東急フードショー":         { xMin: -130, xMax: -30, zMin: -110, zMax: 20 },
+        "渋谷マークシティ":         { xMin: -130, xMax: -20, zMin: -110, zMax: 20 },
+        "渋谷ちかみち":             { xMin: -30,  xMax: 60,  zMin: -110, zMax: 20 },
+        "JR渋谷駅改札内":           { xMin: -20,  xMax: 80,  zMin: -110, zMax: 20 },
+        "渋谷スクランブルスクエア":  { xMin: 40,   xMax: 160, zMin: -110, zMax: 20 },
+        "渋谷ヒカリエ ShinQs":      { xMin: 80,   xMax: 160, zMin: -110, zMax: 160 },
+        "東京メトロ渋谷駅":         { xMin: -50,  xMax: 80,  zMin: -110, zMax: 160 },
+        "東急東横線渋谷駅":         { xMin: -80,  xMax: 180, zMin: -140, zMax: 130 },
+        "東急田園都市線渋谷駅":     { xMin: -190, xMax: 150, zMin: -110, zMax: 160 },
+      };
 
-        const canvas = document.createElement("canvas");
-        canvas.width = 256;
-        canvas.height = 80;
-        const ctx = canvas.getContext("2d")!;
-        const typeColors: Record<string, string> = {
-          convenience: "#44cc44", cafe: "#cc8844", restaurant: "#cc4444",
-          fastfood: "#ff6644", drugstore: "#44aacc", fashion: "#cc44aa",
-          goods: "#aaaa44", book: "#8888cc", beauty: "#cc88cc",
-          service: "#6688aa", food: "#ff8844", other: "#888888",
-        };
-        ctx.fillStyle = typeColors[store.type] ?? "#888888";
-        ctx.globalAlpha = 0.85;
-        ctx.fillRect(0, 0, 256, 80);
-        ctx.globalAlpha = 1;
-        ctx.font = "32px sans-serif";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "#fff";
-        ctx.fillText(store.icon, 8, 40);
-        ctx.font = "bold 22px sans-serif";
-        const name = store.name.length > 10 ? store.name.slice(0, 10) + "…" : store.name;
-        ctx.fillText(name, 48, 40);
+      renderedTenants = renderTenants(stores, tenantFloorEntries, floorGroups, {
+        hashFn: hashCode,
+        areaZones: SHIBUYA_AREA_ZONES,
+      });
 
-        const texture = new THREE.CanvasTexture(canvas);
-        const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, sizeAttenuation: true });
-        const sprite = new THREE.Sprite(mat);
-        const worldPos = new THREE.Vector3(centroid[0], centroid[1] + 2, centroid[2]);
-        sprite.position.copy(worldPos);
-        sprite.scale.set(14, 4.5, 1);
-        floorGroup.add(sprite);
-
-        const poi: ShibuyaPOI = {
-          sprite,
-          floorKey: store.floorKey,
-          worldPos,
-          label: `${store.area} - ${store.name}`,
+      for (const rt of renderedTenants) {
+        allPOIs.push({
+          sprite: rt.sprite,
+          floorKey: rt.floorKey,
+          worldPos: rt.worldPos,
+          label: `${rt.store.area} - ${rt.store.name}`,
           surfaceType: "tenant",
-        };
-        allPOIs.push(poi);
-        tenantPOIs.push(poi);
+        });
       }
     }
   } catch { /* テナントデータがなくても動作する */ }
@@ -362,19 +336,23 @@ async function main() {
   }
 
   // グローバル検索インデックスに登録（route-panelが使うsearch()に反映）
-  const virtualPOIs: POIEntry[] = allPOIs.map(p => ({
-    sprite: p.sprite,
-    facility: {
-      geometry: { type: "Point" as const, coordinates: [p.worldPos.x, -p.worldPos.z] },
-      category: p.surfaceType === "tenant" ? "TENANT" : "DOOR",
-      area: p.label.split(" - ")[0] || p.label,
-      name: p.label.split(" - ")[1] || p.label,
-    },
-    floorKey: p.floorKey,
-    worldPos: p.worldPos,
-    label: p.label,
-    categoryLabel: p.surfaceType,
-  }));
+  const virtualPOIs: POIEntry[] = allPOIs.map(p => {
+    const parts = p.label.split(" - ");
+    const isTenant = parts.length >= 2;
+    return {
+      sprite: p.sprite,
+      facility: {
+        geometry: { type: "Point" as const, coordinates: [p.worldPos.x, -p.worldPos.z] },
+        category: p.surfaceType === "tenant" ? "TENANT" : "DOOR",
+        area: isTenant ? parts[0] : p.floorKey,
+        name: isTenant ? parts[1] : p.label,
+      },
+      floorKey: p.floorKey,
+      worldPos: p.worldPos,
+      label: p.label,
+      categoryLabel: p.surfaceType,
+    };
+  });
   buildSearchIndex(virtualPOIs);
 
   // ネットワーク読み込み + 経路検索UI
@@ -510,8 +488,14 @@ async function main() {
 
     const intersects = raycaster.intersectObjects(meshes);
     if (intersects.length > 0) {
-      const layer = intersects[0].object.userData.layer;
-      tooltip.textContent = typeNames[layer] || layer;
+      const obj = intersects[0].object;
+      if (obj.userData.layer === "tenant-overlay" && obj.userData.tenantName) {
+        const area = obj.userData.tenantArea ? `${obj.userData.tenantArea} - ` : "";
+        tooltip.textContent = `${area}${obj.userData.tenantName}`;
+      } else {
+        const layer = obj.userData.layer;
+        tooltip.textContent = typeNames[layer] || layer;
+      }
       tooltip.style.display = "block";
       tooltip.style.left = clientX + 15 + "px";
       tooltip.style.top = clientY - 10 + "px";
