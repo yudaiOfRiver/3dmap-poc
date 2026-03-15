@@ -9,7 +9,7 @@
 <body>
   <canvas id="canvas"></canvas>
   <div id="ui">
-    <div id="header">新宿駅 3Dマップ <a href="shibuya.html" style="color:#88bbff;font-size:12px;margin-left:8px;text-decoration:none">渋谷駅→</a></div>
+    <div id="header">新宿駅 3Dマップ <a href="shibuya.html" style="color:var(--text-link);font-size:12px;margin-left:8px;text-decoration:none">渋谷駅→</a></div>
 
     <!-- 検索 -->
     <div id="search-container">
@@ -66,6 +66,8 @@
 
     <div id="info-panel"></div>
     <div id="tooltip"></div>
+    <button id="share-btn" title="URLをコピー">&#x1F517;</button>
+    <button id="theme-toggle"></button>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

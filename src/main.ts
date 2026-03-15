@@ -14,6 +14,8 @@ import type { TenantStore, RenderedTenant } from "./scene/tenant-renderer";
 import { createNavBar, type NavBarController } from "./ui/nav-bar";
 import type { POIEntry } from "./scene/poi-layer";
 import type { FloorInfo } from "./data/loader";
+import { setupThemeToggle } from "./ui/theme-toggle";
+import { setupShareButton } from "./ui/share-button";
 import "./style.css";
 
 // --- PLATEAU データ型 ---
@@ -92,6 +94,8 @@ const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 async function main() {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const { scene, camera, controls, requestRender } = setupScene(canvas);
+  setupThemeToggle(scene, requestRender);
+  setupShareButton();
 
   // 新宿駅向けカメラ初期値
   camera.position.set(150, 120, 200);

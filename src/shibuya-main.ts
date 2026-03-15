@@ -16,6 +16,8 @@ import Fuse from "fuse.js";
 import { renderBuildings } from "./scene/building-renderer";
 import { createWalkEngine, type WalkController, type DirectionInfo } from "./ui/walk-engine";
 import { showWalkArrows, clearWalkArrows, handleArrowClick, handleArrowHover } from "./ui/walk-arrows";
+import { setupThemeToggle } from "./ui/theme-toggle";
+import { setupShareButton } from "./ui/share-button";
 import "./style.css";
 
 interface ShibuyaSurface {
@@ -78,6 +80,8 @@ const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 async function main() {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const { scene, camera, controls, requestRender } = setupScene(canvas);
+  setupThemeToggle(scene, requestRender);
+  setupShareButton();
 
   // 地下駅向けカメラ初期値（B1レベルを見下ろす）
   camera.position.set(150, 120, 200);
